@@ -1,0 +1,14 @@
+<h1>IP Information</h1>
+
+<table id="ipInfo" class="table table-zebra"></table>
+
+<script type="text/javascript">
+getData('/api/ip', responseText => {
+  const json = JSON.parse(responseText);
+  const html = Object
+    .keys(json)
+    .map(key => `<tr><td>${key}</td><td>${json[key]}</td></tr>`)
+    .join("");
+  document.getElementById("ipInfo").innerHTML = html;
+});
+</script>

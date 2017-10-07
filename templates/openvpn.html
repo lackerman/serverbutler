@@ -1,0 +1,39 @@
+{{if .Notification}}
+    {{if eq .Notification.Type "info"}}
+        {{template "_notification.html" .Notification }}
+    {{end}}
+    {{if eq .Notification.Type "error"}}
+        {{template "_notification.html" .Notification }}
+    {{end}}
+{{end}}
+
+<h6>OpenVPN configuration</h6>
+<form class="form" method="post" action="openvpn/selection">
+  <div class="form_group">
+    <select id="config" name="config" class="browser-default"></select>
+  </div>
+  <button class="button button-blue">Update config</button>
+</form>
+
+<h6>OpenVPN credentials</h6>
+<form class="form" method="post" action="openvpn/credentials">
+  <div class="form_group form-horizontal">
+    <input name="username" type="text" placeholder="Username">
+    <input name="password" type="password" placeholder="Password">
+  </div>
+  <button class="button button-blue">Update credentials</button>
+</form>
+
+<script type="text/javascript">
+getData('/api/openvpn', responseText => {
+  const select = document.getElementById('config');
+  const json = JSON.parse(responseText);
+  json
+    .forEach(file => {
+      const option = document.createElement('option');
+      option.setAttribute('value', file);
+      option.appendChild(document.createTextNode(file));
+      select.appendChild(option);
+    });
+});
+</script>

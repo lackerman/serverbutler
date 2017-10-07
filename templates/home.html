@@ -1,0 +1,18 @@
+<html>
+    {{template "_header.html" .Title}}
+    <body>
+        {{template "_nav.html" .Title}}
+        <div class="row">
+            <section class="col-1"></section>
+            <section class="col-10">
+                <h1>{{ .Heading }}</h1>
+
+                <p>Welcome to the home page for managing your Freenas jail's OpenVPN configuration.</p>
+                <p>If you need to change any config, go to the <a href="/config">Config</a> page</p>
+
+                {{template "ip.html"}}
+            </section>
+            <section class="col-1"></section>
+        </div>
+    </body>
+</html>

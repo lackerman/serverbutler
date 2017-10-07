@@ -1,0 +1,14 @@
+{{if .Notification}}
+  {{if eq .Notification.Type "info"}}
+    {{template "_notification.html" .Notification }}
+  {{end}}
+  {{if eq .Notification.Type "error"}}
+    {{template "_notification.html" .Notification }}
+  {{end}}
+{{end}}
+
+<h6>Transmission commands</h6>
+<form class="form" action="transmission/pause">
+  <button class="button">Pause all downloads</button>
+  <button class="button">Start all downloads</button>
+</form>

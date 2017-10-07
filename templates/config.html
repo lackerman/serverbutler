@@ -1,0 +1,23 @@
+<html>
+    {{template "_header.html" .Title}}
+    <body>
+        {{template "_nav.html" .Title}}
+        <div class="row">
+            <section class="col-1"></section>
+            <section class="col-10">
+                <h1>{{ .Heading }}</h1>
+                
+                <div class="row">
+                  <section class="col-half">
+                    {{template "openvpn.html"}}
+                  </section>
+                  <section class="col-half">
+                    {{template "slack.html"}}
+                    {{template "transmission.html"}}
+                  </section>
+                </div>
+            </section>
+            <section class="col-1"></section>
+        </div>
+    </body>
+</html>
