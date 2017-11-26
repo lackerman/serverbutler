@@ -15,8 +15,23 @@ type configController struct {
 func (c *configController) get(w http.ResponseWriter, req *http.Request) {
 	log.Printf("controller :: config :: get - %v\n", req.URL)
 
+	slack := viewmodels.Slack{
+		URL: "http://www.example.com",
+	}
+	openvpn := viewmodels.OpenVPN{
+		Configs:  []string{"1", "2", "3"},
+		Selected: "3",
+	}
+
+	config := viewmodels.Config{
+		Title:   "ServerConf",
+		Heading: "ServerConf",
+		OpenVPN: openvpn,
+		Slack:   slack,
+	}
+
 	w.Header().Set("Content-Type", "text/html")
-	err := c.template.Execute(w, viewmodels.GetConfig())
+	err := c.template.Execute(w, config)
 
 	if err != nil {
 		log.Printf(err.Error())

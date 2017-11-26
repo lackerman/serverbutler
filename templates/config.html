@@ -9,10 +9,10 @@
                 
                 <div class="row">
                   <section class="col-half">
-                    {{template "openvpn.html"}}
+                    {{template "openvpn.html" .OpenVPN}}
                   </section>
                   <section class="col-half">
-                    {{template "slack.html"}}
+                    {{template "slack.html" .Slack}}
                     {{template "transmission.html"}}
                   </section>
                 </div>

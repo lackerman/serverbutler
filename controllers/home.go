@@ -16,7 +16,10 @@ func (c *homeController) get(w http.ResponseWriter, req *http.Request) {
 	log.Printf("controller :: home :: get - %v\n", req.URL)
 
 	w.Header().Set("Content-Type", "text/html")
-	err := c.template.Execute(w, viewmodels.GetHome())
+	err := c.template.Execute(w, viewmodels.Home{
+		Title:   "Serverbutler",
+		Heading: "Serverbutler",
+	})
 
 	if err != nil {
 		log.Printf(err.Error())

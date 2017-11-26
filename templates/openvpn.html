@@ -10,7 +10,12 @@
 <h6>OpenVPN configuration</h6>
 <form class="form" method="post" action="openvpn/selection">
   <div class="form_group">
-    <select id="config" name="config" class="browser-default"></select>
+    <select id="config" name="config" class="browser-default">
+      {{$selected := .Selected}}
+      {{range .Configs}}
+      
+      <option value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>{{end}}
+    </select>
   </div>
   <button class="button button-blue">Update config</button>
 </form>
@@ -23,17 +28,3 @@
   </div>
   <button class="button button-blue">Update credentials</button>
 </form>
-
-<script type="text/javascript">
-getData('/api/openvpn', responseText => {
-  const select = document.getElementById('config');
-  const json = JSON.parse(responseText);
-  json
-    .forEach(file => {
-      const option = document.createElement('option');
-      option.setAttribute('value', file);
-      option.appendChild(document.createTextNode(file));
-      select.appendChild(option);
-    });
-});
-</script>
