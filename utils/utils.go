@@ -1,8 +1,9 @@
 package utils
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 )
@@ -25,7 +26,6 @@ func GetFileList(directory string) ([]string, error) {
 	for _, fileInfo := range fileInfos {
 		if !fileInfo.IsDir() {
 			path = directory + fileInfo.Name()
-			log.Printf("Loading template: %v", path)
 			*paths = append(*paths, path)
 		}
 	}
@@ -40,12 +40,14 @@ type ErrorMessage struct {
 
 // WriteJSONError uses a ResponseWriter to write a json error message
 func WriteJSONError(w http.ResponseWriter, code int, msg string) {
-	payload, err := json.Marshal(ErrorMessage{msg})
-	if err != nil {
-		http.Error(w, "Failed to marshal error. Original message: "+msg, 500)
-		return
-	}
 	w.WriteHeader(code)
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(payload)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(ErrorMessage{msg})
+}
+
+// Hash to get a sha1 hash of a string
+func Hash(s string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(s))
+	return hex.EncodeToString(hasher.Sum(nil))
 }

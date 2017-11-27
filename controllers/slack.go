@@ -1,11 +1,13 @@
 package controllers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
 	"github.com/lackerman/serverbutler/utils"
+
+	"github.com/lackerman/serverbutler/constants"
+
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -24,14 +26,15 @@ func (c *slackController) handle(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *slackController) update(w http.ResponseWriter, req *http.Request) {
-	log.Printf("controller :: slackController :: getConfigFiles - %v\n", req.URL)
+	log.Printf("controller :: slack :: update - %v\n", req.URL)
 
-	paths, err := utils.GetFileList("controllers/")
+	req.ParseForm()
+	url := req.Form.Get("webhook")
+	err := c.db.Put([]byte(constants.SlackURLKey), []byte(url), nil)
 	if err != nil {
-		log.Printf(err.Error())
-		http.Error(w, "Failed to execute the template", 500)
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to save slack config")
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(paths)
+	http.Redirect(w, req, "/config", 301)
 }

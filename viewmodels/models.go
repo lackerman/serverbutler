@@ -14,6 +14,8 @@ type Config struct {
 
 type OpenVPN struct {
 	Notification string
+	Username     string
+	Password     string
 	Configs      []string
 	Selected     string
 }
