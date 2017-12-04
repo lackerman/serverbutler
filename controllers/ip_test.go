@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +12,7 @@ func TestApiControllerIP(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	api := new(ipController)
-	api.ip(w, req)
+	api.get(w, req)
 
 	res := w.Result()
 
@@ -23,10 +24,11 @@ func TestApiControllerIP(t *testing.T) {
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
-
-	returned := string(body)
-	expected := `{ "ip": "localhost" }`
-	if returned != expected {
-		t.Errorf("The IP handler failed to return the correct response\n%v\n%v", returned, expected)
+	var info map[string]interface{}
+	if err := json.Unmarshal(body, &info); err != nil {
+		t.Errorf("The IP handler failed to return a valid JSON response. %v\n%v", err.Error(), string(body))
+	}
+	if _, present := info["ip"]; !present {
+		t.Errorf("The IP handler failed to return an IP")
 	}
 }
