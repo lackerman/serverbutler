@@ -4,8 +4,12 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 // GetFileList returns all the files in the specified directory
@@ -50,4 +54,37 @@ func Hash(s string) string {
 	hasher := sha1.New()
 	hasher.Write([]byte(s))
 	return hex.EncodeToString(hasher.Sum(nil))
+}
+
+// SearchAndReplace scans through a directory and replaces a string in each of the files
+func SearchAndReplace(path string, fileMask string, search string, replace string) error {
+	return filepath.Walk(path, func(filePath string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// Ignore directories
+		if !fi.IsDir() {
+			// File suffix should be externalised
+			matched, err := filepath.Match(fileMask, fi.Name())
+			if err != nil {
+				return err
+			}
+			if matched {
+				read, err := ioutil.ReadFile(filePath)
+				if err != nil {
+					return err
+				}
+				if read[len(read)-1] == 10 {
+					read = read[0 : len(read)-1]
+				}
+				newContents := strings.Replace(string(read), search, replace, 1)
+				fmt.Printf("|%s|%s|", read, newContents)
+				err = ioutil.WriteFile(filePath, []byte(newContents), 0)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 }
