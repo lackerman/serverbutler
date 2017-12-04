@@ -29,7 +29,7 @@ func GetFileList(directory string) ([]string, error) {
 	paths := new([]string)
 	for _, fileInfo := range fileInfos {
 		if !fileInfo.IsDir() {
-			path = directory + fileInfo.Name()
+			path = filepath.Join(directory, fileInfo.Name())
 			*paths = append(*paths, path)
 		}
 	}
