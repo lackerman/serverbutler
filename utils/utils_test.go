@@ -1,50 +1,62 @@
 package utils
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestSearchAndReplace(t *testing.T) {
-	files := []string{"file1.txt", "file2.txt", "file3.txt"}
-	ignored := "file.dat"
-	dir := "tmp"
+const (
+	tmpDir = "tmp"
+)
 
-	p, _ := filepath.Abs(dir)
-	os.Mkdir(dir, os.ModePerm)
-	// Setup tmp files for test
-	for _, fn := range files {
-		writeFile(t, p+"/"+fn, "hello")
-	}
-	writeFile(t, p+"/"+ignored, "hello")
+func TestSearchAndReplace(t *testing.T) {
+	// Setup
+	files, ignored := setup(t)
 
 	// Execute
-	SearchAndReplace(p, "*.txt", "hello", "goodbye")
+	SearchAndReplace(tmpDir, "*.txt", "hello", "goodbye")
 
 	// Validate
 	for _, file := range files {
-		contents := readFile(t, dir, file)
+		contents := readFile(t, file)
 		if contents != "goodbye" {
 			t.Errorf("The file '%v' was not updated", file)
 		}
 	}
 
-	contents := readFile(t, dir, ignored)
+	contents := readFile(t, ignored)
 	if contents != "hello" {
 		t.Errorf("The Search and Replace was not contained to the file mask")
 	}
 
 	// Teardown
-	err := os.RemoveAll(dir)
+	err := os.RemoveAll(tmpDir)
 	if err != nil {
 		t.Errorf("Failed to cleanup after the test")
 	}
 }
 
-func readFile(t *testing.T, dir string, file string) string {
-	contents, err := ioutil.ReadFile(dir + "/" + file)
+func setup(t *testing.T) ([]string, string) {
+	p, _ := filepath.Abs(tmpDir)
+	if err := os.Mkdir(tmpDir, os.ModePerm); err != nil {
+		t.Fatalf("Failed to create temp directory. %v", err.Error())
+	}
+	files := []string{}
+	for i := 1; i <= 3; i++ {
+		file := filepath.Join(p, fmt.Sprintf("file%i.txt", i))
+		files = append(files, file)
+		writeFile(t, file, "hello")
+	}
+	ignored := filepath.Join(p, "file.dat")
+	writeFile(t, ignored, "hello")
+	return files, ignored
+}
+
+func readFile(t *testing.T, file string) string {
+	contents, err := ioutil.ReadFile(file)
 	if err != nil {
 		t.Errorf("Failed to read the file. %v", err)
 	}
