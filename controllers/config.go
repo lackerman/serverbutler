@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -52,53 +53,73 @@ func (c *configController) get(w http.ResponseWriter, req *http.Request) {
 func (c *configController) openvpnConfig() (*viewmodels.OpenVPN, error) {
 	log.Println("controller :: configController :: openvpnConfig")
 
-	selected, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
+	configs := []string{}
+	selected, username, password, dir := "", "", "", ""
+
+	b, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
 	if err != nil {
-		if err != errors.ErrNotFound { // Ignoring missing config at this point in time
+		// Ignoring missing config at this point in time
+		if err != errors.ErrNotFound {
 			return nil, errors.New("Failed to retrieve openvpn config. Reason: " + err.Error())
 		}
+	} else {
+		selected = string(b)
 	}
 
-	dirBytes, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
+	b, err = c.db.Get([]byte(constants.OpenvpnDir), nil)
 	if err != nil {
-		if err == errors.ErrNotFound {
-			// Ignoring missing config at this point in time
-			dirBytes = []byte("/opt/openvpn/")
-			c.db.Put([]byte(constants.OpenvpnDir), dirBytes, nil)
-		} else {
+		// Ignoring missing config at this point in time (during 1st initialisation)
+		if err != errors.ErrNotFound {
 			return nil, errors.New("Failed to retrieve openvpn config. Reason: " + err.Error())
 		}
+	} else {
+		dir = string(b)
 	}
-	dir := string(dirBytes)
 
-	paths, err := utils.GetFileList(string(dir))
+	if b != nil {
+		configs, err = retrieveConfigs(dir)
+		if err != nil {
+			return nil, err
+		}
+		username, password = retrieveCredentials(dir)
+	}
+
+	return &viewmodels.OpenVPN{
+		ConfigDir: dir,
+		Configs:   configs,
+		Selected:  selected,
+		Username:  username,
+		Password:  password,
+	}, nil
+}
+
+func retrieveConfigs(dir string) ([]string, error) {
+	paths, err := utils.GetFileList(dir)
 	if err != nil {
 		return nil, errors.New("Failed to execute the template. Reason: " + err.Error())
 	}
 	sort.Strings(paths)
+	return paths, nil
+}
 
-	contents, err := ioutil.ReadFile(dir + "/" + constants.OpenvpnCredentialFile)
-	creds := []string{"", ""}
-	if err == nil {
-		creds = strings.Split(string(contents), "\n")
+func retrieveCredentials(dir string) (string, string) {
+	contents, err := ioutil.ReadFile(filepath.Join(dir, constants.OpenvpnCredentialFile))
+	if err != nil {
+		return "", ""
 	}
-	username := creds[0]
-	password := utils.Hash(creds[1])
-
-	return &viewmodels.OpenVPN{
-		Configs:  paths,
-		Selected: string(selected),
-		Username: username,
-		Password: password,
-	}, nil
+	creds := strings.Split(string(contents), "\n")
+	return creds[0], utils.Hash(creds[1])
 }
 
 func (c *configController) slackConfig() (*viewmodels.Slack, error) {
-	url, err := c.db.Get([]byte(constants.SlackURLKey), nil)
+	url := ""
+	b, err := c.db.Get([]byte(constants.SlackURLKey), nil)
 	if err != nil {
-		return nil, errors.New("Failed to retrieve slack url. Reason: " + err.Error())
+		if err != errors.ErrNotFound {
+			return nil, errors.New("Failed to retrieve slack url. Reason: " + err.Error())
+		}
+	} else {
+		url = string(b)
 	}
-	return &viewmodels.Slack{
-		URL: string(url),
-	}, nil
+	return &viewmodels.Slack{url}, nil
 }

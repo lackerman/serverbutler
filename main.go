@@ -1,15 +1,13 @@
-//go:generate go-bindata -pkg utils -o utils/assets.go public templates
+//go:generate go-bindata -ignore .*.swp -pkg utils -o utils/assets.go public templates
 package main
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/lackerman/serverbutler/constants"
 	"github.com/lackerman/serverbutler/controllers"
 	"github.com/lackerman/serverbutler/utils"
 	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/syndtr/goleveldb/leveldb/errors"
 )
 
 func main() {
@@ -24,18 +22,8 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	initDb(db)
 
 	controllers.RegisterRoutes(templates, db)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func initDb(db *leveldb.DB) {
-	if _, err := db.Get([]byte(constants.OpenvpnDir), nil); err == errors.ErrNotFound {
-		db.Put([]byte(constants.OpenvpnDir), []byte("tmp/config"), nil)
-	}
-	if _, err := db.Get([]byte(constants.SlackURLKey), nil); err == errors.ErrNotFound {
-		db.Put([]byte(constants.SlackURLKey), []byte(""), nil)
-	}
 }

@@ -24,6 +24,8 @@ func RegisterRoutes(templates *template.Template, db *leveldb.DB) {
 
 	http.HandleFunc("/api/ip", ip.get)
 	http.HandleFunc("/api/slack/config", slack.update)
+	http.HandleFunc("/api/openvpn/config", openvpn.updateConfigDir)
 	http.HandleFunc("/api/openvpn/selection", openvpn.selection)
 	http.HandleFunc("/api/openvpn/credentials", openvpn.credentials)
+	http.HandleFunc("/api/openvpn/download", openvpn.downloadConfig)
 }

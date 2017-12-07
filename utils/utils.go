@@ -1,11 +1,15 @@
 package utils
 
 import (
+	"archive/zip"
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -25,12 +29,10 @@ func GetFileList(directory string) ([]string, error) {
 		return nil, err
 	}
 
-	var path string
 	paths := new([]string)
 	for _, fileInfo := range fileInfos {
-		if !fileInfo.IsDir() {
-			path = filepath.Join(directory, fileInfo.Name())
-			*paths = append(*paths, path)
+		if !fileInfo.IsDir() && strings.IndexRune(fileInfo.Name(), '.') != 0 {
+			*paths = append(*paths, fileInfo.Name())
 		}
 	}
 
@@ -87,4 +89,66 @@ func SearchAndReplace(path string, fileMask string, search string, replace strin
 		}
 		return nil
 	})
+}
+
+func FileExists(filename string) bool {
+	_, err := os.Stat(filename)
+	return !os.IsNotExist(err)
+}
+
+func DownloadFile(dir string, url string) error {
+	response, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	filename := filepath.Base(url)
+	file, err := os.Create(filepath.Join(dir, filename))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	numCopied, err := io.Copy(file, response.Body)
+	if err != nil {
+		return err
+	}
+	if numCopied == 0 {
+		return errors.New("No data was downloaded from the URL")
+	}
+	return nil
+}
+
+// UnzipFile takes a destination folder unzips the supplied file to the destination folder
+func UnzipFile(dst string, filename string) error {
+	if !FileExists(dst) {
+		if err := os.Mkdir(dst, os.ModePerm); err != nil {
+			return err
+		}
+	}
+	// Open a zip archive for reading.
+	r, err := zip.OpenReader(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		nf, err := os.Create(filepath.Join(dst, f.Name))
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(nf, rc)
+		if err != nil {
+			return err
+		}
+		rc.Close()
+		nf.Close()
+	}
+	return nil
 }

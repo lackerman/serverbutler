@@ -18,6 +18,7 @@ type OpenVPN struct {
 	Password     string
 	Configs      []string
 	Selected     string
+	ConfigDir    string
 }
 
 type Slack struct {

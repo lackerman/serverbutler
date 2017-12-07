@@ -74,3 +74,27 @@ func writeFile(t *testing.T, path string, output string) {
 		t.Fatalf("Failed to write contents to file. %v", err.Error())
 	}
 }
+
+func TestFileDownload(t *testing.T) {
+	DownloadFile("./", "https://raw.githubusercontent.com/lackerman/serverbutler/master/LICENSE")
+	if _, err := os.Stat("LICENSE"); os.IsNotExist(err) {
+		t.Fatalf("Failed to download file. %v", err.Error())
+	}
+	if err := os.Remove("LICENSE"); err != nil {
+		t.Fatalf("Failed to delete the downloaded file. %v", err.Error())
+	}
+}
+
+func TestUnzipFile(t *testing.T) {
+	DownloadFile("./", "https://nordvpn.com/api/files/zip")
+	err := UnzipFile("./unzipped", "zip")
+	if err != nil {
+		t.Fatalf("Failed to unzip file. %v", err.Error())
+	}
+	if err := os.Remove("zip"); err != nil {
+		t.Fatalf("Failed to delete the downloaded file. %v", err.Error())
+	}
+	if err := os.RemoveAll("unzipped"); err != nil {
+		t.Fatalf("Failed to delete the downloaded file. %v", err.Error())
+	}
+}

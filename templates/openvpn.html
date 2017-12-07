@@ -1,30 +1,57 @@
 {{if .Notification}}
-    {{if eq .Notification.Type "info"}}
-        {{template "_notification.html" .Notification }}
-    {{end}}
-    {{if eq .Notification.Type "error"}}
-        {{template "_notification.html" .Notification }}
-    {{end}}
+	{{if eq .Notification.Type "info"}}
+		{{template "_notification.html" .Notification }}
+	{{end}}
+	{{if eq .Notification.Type "error"}}
+		{{template "_notification.html" .Notification }}
+	{{end}}
 {{end}}
 
 <h6>OpenVPN configuration</h6>
-<form class="form" method="post" action="/api/openvpn/selection">
-  <div class="form_group">
-    <select id="config" name="config" class="browser-default">
-      {{$selected := .Selected}}
-      {{range .Configs}}
-      
-      <option value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>{{end}}
-    </select>
-  </div>
-  <button class="button button-blue">Update config</button>
+<form class="form form-horizontal" method="post" action="/api/openvpn/config">
+	<div class="form_group">
+		<input name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
+		<button class="button button-blue">Update</button>
+		<button class="button button-blue" id="download">
+			<div id="loading" class="ring-1" style="display:none"></div>
+			<i id="icon" class="fa fa-download" aria-hidden="true"></i>
+		</button>
+	</div>
+</form>
+
+<form class="form form-horizontal" method="post" action="/api/openvpn/selection">
+	<div class="form_group">
+		<select id="config" name="config" class="browser-default">
+			{{$selected := .Selected}}
+			{{range .Configs}} 
+				<option value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
+			{{end}}
+		</select>
+		<button class="button button-blue">Update config</button>
+	</div>
 </form>
 
 <h6>OpenVPN credentials</h6>
-<form class="form" method="post" action="/api/openvpn/credentials">
-  <div class="form_group form-horizontal">
-    <input name="username" type="text" placeholder="Username" value="{{ .Username }}">
-    <input name="password" type="password" placeholder="Password" value="{{ .Password }}">
-  </div>
-  <button class="button button-blue">Update credentials</button>
+<form class="form form-horizontal" method="post" action="/api/openvpn/credentials">
+	<div class="form_group">
+		<input name="username" type="text" placeholder="Username" value="{{ .Username }}">
+		<input name="password" type="password" placeholder="Password" value="{{ .Password }}">
+	</div>
+	<div class="form_group">
+		<button class="button button-blue">Update credentials</button> <i class="fa fa-info-circle" aria-hidden="true"></i>
+	</div>
 </form>
+
+<script>
+const loading = document.getElementById("loading");
+const btn = document.getElementById("download");
+const icon = document.getElementById("icon");
+btn.addEventListener("click", (evt) => {
+	icon.style.display = "none";
+	loading.style.display = "block";
+	getData('/api/openvpn/download', (text, err) => {
+		icon.style.display = "block";
+		loading.style.display = "none";
+	});
+});
+</script>

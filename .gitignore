@@ -1,4 +1,5 @@
 .DS_Store
 *.swp
-serverbutler
 db
+.idea/
+bin/

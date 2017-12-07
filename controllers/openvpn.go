@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/lackerman/serverbutler/constants"
 
@@ -16,6 +18,29 @@ import (
 
 type openvpnController struct {
 	db *leveldb.DB
+}
+
+func (c *openvpnController) updateConfigDir(w http.ResponseWriter, req *http.Request) {
+	log.Printf("controller :: openvpn :: config - %v\n", req.URL)
+	if req.Method != "POST" {
+		log.Printf("Incorrect request method: %v", req.Method)
+		utils.WriteJSONError(w, http.StatusBadRequest, "Unsupported request type")
+		return
+	}
+	req.ParseForm()
+	dir := req.Form.Get("dir")
+	err := os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		log.Printf(err.Error())
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to create dir.")
+	}
+
+	err = c.db.Put([]byte(constants.OpenvpnDir), []byte(dir), nil)
+	if err != nil {
+		log.Printf(err.Error())
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to save config dir")
+	}
+	http.Redirect(w, req, "/config", 301)
 }
 
 func (c *openvpnController) selection(w http.ResponseWriter, req *http.Request) {
@@ -32,6 +57,28 @@ func (c *openvpnController) selection(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 	http.Redirect(w, req, "/config", 301)
+}
+
+func (c *openvpnController) downloadConfig(w http.ResponseWriter, req *http.Request) {
+	log.Printf("controller :: openvpn :: credentials - %v\n", req.URL)
+	b, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
+	if err != nil {
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to retrieve config")
+		return
+	}
+	dir := string(b)
+	err = utils.DownloadFile(dir, "https://nordvpn.com/api/files/zip")
+	if err != nil {
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to download config")
+	}
+	err = utils.UnzipFile(dir, filepath.Join(dir, "zip"))
+	if err != nil {
+		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to unzip the downloaded config")
+	}
+	err = os.Remove(filepath.Join(dir, "zip"))
+	if err != nil {
+		log.Printf("Failed to delete the zip file. %v", err.Error())
+	}
 }
 
 func (c *openvpnController) credentials(w http.ResponseWriter, req *http.Request) {
