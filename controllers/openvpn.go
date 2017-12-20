@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -114,9 +114,18 @@ func (c *openvpnController) startOpenvpn() error {
 		return err
 	}
 	cmd := exec.Command("openvpn", string(selection))
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	result := cmd.Run()
-	log.Printf("%q. Result: %v", result, out.String())
+	pipe, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Printf("There was an error opening the pipe to the command. %v\n", err.Error())
+	}
+	if err := cmd.Start(); err != nil {
+		log.Printf("There was an error starting the process. %v\n", err.Error())
+	}
+	if _, err := io.Copy(os.Stdout, pipe); err != nil {
+		log.Printf(err.Error())
+	}
+	if err := cmd.Wait(); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
