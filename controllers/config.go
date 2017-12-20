@@ -14,23 +14,29 @@ import (
 	"github.com/lackerman/serverbutler/viewmodels"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"os"
 )
 
 type configController struct {
 	template *template.Template
 	db       *leveldb.DB
+	logger 	 *log.Logger
+}
+
+func NewConfigController(t *template.Template, db *leveldb.DB) *configController {
+	return &configController{t, db, log.New(os.Stdout, "controller :: config - ", log.LstdFlags)}
 }
 
 func (c *configController) get(w http.ResponseWriter, req *http.Request) {
-	log.Printf("controller :: config :: get - %v\n", req.URL)
+	c.logger.Printf("get - %v\n", req.URL)
 
-	slack, err := c.slackConfig()
+	slack, err := c.slack()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
 
-	openvpn, err := c.openvpnConfig()
+	openvpn, err := c.openvpn()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -50,10 +56,10 @@ func (c *configController) get(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (c *configController) openvpnConfig() (*viewmodels.OpenVPN, error) {
-	log.Println("controller :: configController :: openvpnConfig")
+func (c *configController) openvpn() (*viewmodels.OpenVPN, error) {
+	c.logger.Println("openvpn - retrieving configs")
 
-	configs := []string{}
+	var configs []string
 	selected, username, password, dir := "", "", "", ""
 
 	b, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
@@ -111,7 +117,8 @@ func retrieveCredentials(dir string) (string, string) {
 	return creds[0], utils.Hash(creds[1])
 }
 
-func (c *configController) slackConfig() (*viewmodels.Slack, error) {
+func (c *configController) slack() (*viewmodels.Slack, error) {
+	c.logger.Println("slack - getting config")
 	url := ""
 	b, err := c.db.Get([]byte(constants.SlackURLKey), nil)
 	if err != nil {
@@ -121,5 +128,5 @@ func (c *configController) slackConfig() (*viewmodels.Slack, error) {
 	} else {
 		url = string(b)
 	}
-	return &viewmodels.Slack{url}, nil
+	return &viewmodels.Slack{URL: url}, nil
 }
