@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"strings"
+	"github.com/lackerman/serverbutler/utils"
+	"io/ioutil"
 )
 
 type staticController struct {
@@ -16,17 +16,23 @@ type staticController struct {
 func (c *staticController) handler(w http.ResponseWriter, req *http.Request) {
 	log.Printf("controller :: static :: handler - %v\n", req.URL)
 
-	path := c.publicDirectory + req.URL.Path
-	file, err := os.Open(path)
-	defer file.Close()
-	if err == nil {
-		w.Header().Set("Content-Type", contentType(path))
-		bufferedReader := bufio.NewReader(file)
-		bufferedReader.WriteTo(w)
-	} else {
+	bytes, err := c.staticAsset(req.URL.Path)
+	if err != nil {
 		w.WriteHeader(404)
-		fmt.Fprintf(w, "Failed to find the requested resource")
+		fmt.Fprintln(w, "Failed to find the requested resource")
+	} else {
+		w.Header().Set("Content-Type", contentType(req.URL.Path))
+		w.Write(bytes)
 	}
+}
+
+func (c *staticController) staticFile(p string) ([]byte, error) {
+	path := c.publicDirectory + p
+	return ioutil.ReadFile(path)
+}
+
+func (c *staticController) staticAsset(p string) ([]byte, error) {
+	return utils.Asset(p[1:])
 }
 
 func contentType(path string) string {

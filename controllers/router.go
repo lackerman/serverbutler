@@ -10,7 +10,7 @@ import (
 // RegisterRoutes used by the web app to direct to controllers and static assest handlers
 func RegisterRoutes(templates *template.Template, db *leveldb.DB) {
 	home := &homeController{templates.Lookup("home.html")}
-	config := &configController{templates.Lookup("config.html"), db}
+	config := NewConfigController(templates.Lookup("config.html"), db)
 	static := &staticController{"public/"}
 
 	http.HandleFunc("/", home.get)

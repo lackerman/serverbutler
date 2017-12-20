@@ -1,4 +1,4 @@
-//go:generate go-bindata -ignore .*.swp -pkg utils -o utils/assets.go public templates
+//go:generate go-bindata -ignore ".*.swp|.DS_Store" -pkg utils -prefix public -o utils/assets.go templates public/...
 package main
 
 import (
@@ -18,7 +18,7 @@ func main() {
 
 	// The returned DB instance is safe for concurrent use. Which means that all
 	// DB's methods may be called concurrently from multiple goroutines.
-	db, err := leveldb.OpenFile("db", nil)
+	db, err := leveldb.OpenFile("/tmp/db", nil)
 	if err != nil {
 		panic(err.Error())
 	}
