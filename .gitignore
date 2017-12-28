@@ -12,3 +12,6 @@ tmp/
 
 # vscode
 .vscode
+
+# Go generated files
+utils/assets.go
