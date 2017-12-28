@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -103,29 +102,36 @@ func (c *openvpnController) credentials(w http.ResponseWriter, req *http.Request
 		utils.WriteJSONError(w, http.StatusInternalServerError, "Failed to write credentials")
 		return
 	}
-	go c.startOpenvpn()
 
 	http.Redirect(w, req, "/config", 301)
 }
 
-func (c *openvpnController) startOpenvpn() error {
-	selection, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
+func (c *openvpnController) restart(w http.ResponseWriter, req *http.Request) {
+	err := func (w http.ResponseWriter, req *http.Request) error {
+		configDir, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
+		if err != nil {
+			return err
+		}
+		selection, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
+		if err != nil {
+			return err
+		}
+		config := string(configDir) + "/" + string(selection)
+		log.Printf("Starting openvpn with the selected config: %v", config)
+		cmd := exec.Command("openvpn", config)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Start(); err != nil {
+			return err
+		}
+		log.Printf("Started subprocess %d.", cmd.Process.Pid)
+		return nil
+	}(w, req)
+
 	if err != nil {
-		return err
+		utils.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
-	cmd := exec.Command("openvpn", string(selection))
-	pipe, err := cmd.StdoutPipe()
-	if err != nil {
-		log.Printf("There was an error opening the pipe to the command. %v\n", err.Error())
-	}
-	if err := cmd.Start(); err != nil {
-		log.Printf("There was an error starting the process. %v\n", err.Error())
-	}
-	if _, err := io.Copy(os.Stdout, pipe); err != nil {
-		log.Printf(err.Error())
-	}
-	if err := cmd.Wait(); err != nil {
-		log.Println(err)
-	}
-	return nil
+	http.Redirect(w, req, "/config", 301)
 }

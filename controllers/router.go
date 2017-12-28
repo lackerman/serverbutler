@@ -28,4 +28,5 @@ func RegisterRoutes(templates *template.Template, db *leveldb.DB) {
 	http.HandleFunc("/api/openvpn/selection", openvpn.selection)
 	http.HandleFunc("/api/openvpn/credentials", openvpn.credentials)
 	http.HandleFunc("/api/openvpn/download", openvpn.downloadConfig)
+	http.HandleFunc("/api/openvpn/restart", openvpn.restart)
 }
