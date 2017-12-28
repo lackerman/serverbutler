@@ -1,5 +1,14 @@
-.DS_Store
-*.swp
-db
-.idea/
 bin/
+tmp/
+
+# Mac
+.DS_Store
+
+# Vim
+*.swp
+
+# IntelliJ/Goland
+.idea/
+
+# vscode
+.vscode
