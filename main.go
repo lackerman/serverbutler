@@ -1,12 +1,10 @@
-//go:generate go-bindata -ignore ".*.swp|.DS_Store" -pkg utils -prefix public -o utils/assets.go templates public/...
+//go:generate go-bindata -ignore ".*.swp|.DS_Store" -pkg utils -o utils/assets.go templates
 package main
 
 import (
-	"log"
-	"net/http"
 	"os"
 
-	"github.com/lackerman/serverbutler/controllers"
+	"github.com/lackerman/serverbutler/handlers"
 	"github.com/lackerman/serverbutler/utils"
 	"github.com/syndtr/goleveldb/leveldb"
 )
@@ -24,7 +22,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	controllers.RegisterRoutes(templates, db)
-
-	log.Fatal(http.ListenAndServe(":3000", nil))
+	if err := handlers.RegisterRoutes(templates, db); err != nil {
+		panic(err.Error())
+	}
 }

@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html>
-    {{template "_header.html" .Title}}
-    <body>
+{{template "_header.html" .Title}}
+
+<body>
+    <div class="ui container">
         {{template "_nav.html" .Title}}
-        <div class="row">
-            <section class="col-1"></section>
-            <section class="col-10">
-                <h1>{{ .Heading }}</h1>
-                
-                <div class="row">
-                  <section class="col-half">
+        <div class="ui aligned stackable grid container">
+            <div class="row">
+                <div class="eight wide column">
                     {{template "openvpn.html" .OpenVPN}}
-                  </section>
-                  <section class="col-half">
-                    {{template "slack.html" .Slack}}
-                    {{template "transmission.html"}}
-                  </section>
                 </div>
-            </section>
-            <section class="col-1"></section>
+                <div class="eight wide column">
+                    {{template "slack.html" .Slack}} {{template "transmission.html"}}
+                </div>
+            </div>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>

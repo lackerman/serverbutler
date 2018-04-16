@@ -5,11 +5,6 @@ import (
 	"path/filepath"
 )
 
-// ParseTemplatesFromFS parses all the templates specified by the list of files from the filesystem
-func ParseTemplatesFromFS(paths []string) (*template.Template, error) {
-	return template.ParseFiles(paths...)
-}
-
 // ParseTemplatesFromBinData parses all the templates specified by the list of files using go-bindata assets
 func ParseTemplatesFromBinData(templateDir string) (*template.Template, error) {
 	assets, err := AssetDir(templateDir)

@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"crypto/sha1"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -39,18 +38,6 @@ func GetFileList(directory string) ([]string, error) {
 	return *paths, nil
 }
 
-// ErrorMessage is the definition of a JSON error message
-type ErrorMessage struct {
-	Message string `json:"message"`
-}
-
-// WriteJSONError uses a ResponseWriter to write a json error message
-func WriteJSONError(w http.ResponseWriter, code int, msg string) {
-	w.WriteHeader(code)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(ErrorMessage{msg})
-}
-
 // Hash to get a sha1 hash of a string
 func Hash(s string) string {
 	hasher := sha1.New()
@@ -77,7 +64,7 @@ func SearchAndReplace(path string, fileMask string, search string, replace strin
 					return err
 				}
 				if read[len(read)-1] == 10 {
-					read = read[0 : len(read)-1]
+					read = read[0: len(read)-1]
 				}
 				newContents := strings.Replace(string(read), search, replace, 1)
 				fmt.Printf("|%s|%s|", read, newContents)

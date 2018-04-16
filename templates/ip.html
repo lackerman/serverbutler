@@ -1,14 +1,44 @@
-<h1>IP Information</h1>
+<h3 class="ui header">IP Information</h3>
 
-<table id="ipInfo" class="table table-zebra"></table>
-
-<script type="text/javascript">
-getData('/api/ip', responseText => {
-  const json = JSON.parse(responseText);
-  const html = Object
-    .keys(json)
-    .map(key => `<tr><td>${key}</td><td>${json[key]}</td></tr>`)
-    .join("");
-  document.getElementById("ipInfo").innerHTML = html;
-});
-</script>
+<table id="ipInfo" class="ui compact celled striped table">
+    <tr>
+        <td>ip</td>
+        <td>{{ .Ip }}</td>
+    </tr>
+    <tr>
+        <td>city</td>
+        <td>{{ .City }}</td>
+    </tr>
+    <tr>
+        <td>region</td>
+        <td>{{ .Region }}</td>
+    </tr>
+    <tr>
+        <td>country</td>
+        <td>{{ .Country }}</td>
+    </tr>
+    <tr>
+        <td>postal</td>
+        <td>{{ .Postal }}</td>
+    </tr>
+    <tr>
+        <td>latitude</td>
+        <td>{{ .Latitude }}</td>
+    </tr>
+    <tr>
+        <td>longitude</td>
+        <td>{{ .Longitude }}</td>
+    </tr>
+    <tr>
+        <td>timezone</td>
+        <td>{{ .Timezone }}</td>
+    </tr>
+    <tr>
+        <td>asn</td>
+        <td>{{ .Asn }}</td>
+    </tr>
+    <tr>
+        <td>org</td>
+        <td>{{ .Org }}</td>
+    </tr>
+</table>

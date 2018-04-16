@@ -1,7 +1,6 @@
-package controllers
+package handlers
 
 import (
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,51 +8,44 @@ import (
 	"sort"
 	"strings"
 
+	"os"
+
+	"github.com/gin-gonic/gin"
 	"github.com/lackerman/serverbutler/constants"
 	"github.com/lackerman/serverbutler/utils"
 	"github.com/lackerman/serverbutler/viewmodels"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
-	"os"
 )
 
 type configController struct {
-	template *template.Template
 	db       *leveldb.DB
-	logger 	 *log.Logger
+	logger   *log.Logger
+	template string
 }
 
-func NewConfigController(t *template.Template, db *leveldb.DB) *configController {
-	return &configController{t, db, log.New(os.Stdout, "controller :: config - ", log.LstdFlags)}
+func NewConfigHandler(t string, db *leveldb.DB) *configController {
+	return &configController{db: db, template: t, logger: log.New(os.Stdout, "handler :: config - ", log.LstdFlags)}
 }
 
-func (c *configController) get(w http.ResponseWriter, req *http.Request) {
-	c.logger.Printf("get - %v\n", req.URL)
-
+func (c *configController) get(ctx *gin.Context) {
 	slack, err := c.slack()
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		ctx.Error(err)
 		return
 	}
 
 	openvpn, err := c.openvpn()
 	if err != nil {
-		http.Error(w, err.Error(), 500)
+		ctx.Error(err)
 		return
 	}
 
-	config := viewmodels.Config{
-		Title:   "ServerConf",
-		Heading: "ServerConf",
+	ctx.HTML(http.StatusOK, c.template, viewmodels.Config{
+		Title:   "Config",
 		OpenVPN: *openvpn,
 		Slack:   *slack,
-	}
-
-	w.Header().Set("Content-Type", "text/html")
-	err = c.template.Execute(w, config)
-	if err != nil {
-		http.Error(w, "Failed to execute the template", 500)
-	}
+	})
 }
 
 func (c *configController) openvpn() (*viewmodels.OpenVPN, error) {

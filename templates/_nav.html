@@ -1,12 +1,13 @@
-<div class="navbar navbar-collapse">
-    <nav>
-        <ul>
-            <li class="navbar-title">Menu<button role="button">=</button></li>
-            <li><a href="/">Home</a></li>
-            <li><a href="/config">Config</a></li>
-        </ul>
-        <ul>
-            <li><a href="#">Login</a></li>
-        </ul>
-    </nav>
+<p></p>
+<h2 class="ui center aligned header">
+    <i class="hdd outline icon"></i>Serverbutler
+</h2>
+
+<div class="ui secondary pointing menu">
+    <a href="/" class="item {{if eq . "Home" }}active{{ end }}">
+        Home
+    </a>
+    <a href="/config" class="item {{if eq . "Config" }}active{{ end }}">
+        Config
+    </a>
 </div>

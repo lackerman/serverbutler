@@ -7,43 +7,46 @@
 	{{end}}
 {{end}}
 
-<h6>OpenVPN configuration</h6>
-<form class="form form-horizontal" method="post" action="/api/openvpn/config">
-	<div class="form_group">
+<h4>OpenVPN configuration</h4>
+<form class="ui form" method="post" action="/api/openvpn/config">
+	<div class="field">
 		<input name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
-		<button class="button button-blue">Update</button>
-		<button class="button button-blue" id="download">
-			<div id="loading" class="ring-1" style="display:none"></div>
-			<i id="icon" class="fa fa-download" aria-hidden="true"></i>
-		</button>
 	</div>
+	<button class="ui button primary" type="submit">Update</button>
+	<button class="ui button icon" id="download"><i class="download"></i></button>
 </form>
 
-<form class="form form-horizontal" method="post" action="/api/openvpn/selection">
-	<div class="form_group">
-		<select id="config" name="config" class="browser-default">
+<form class="ui form" method="post" action="/api/openvpn/selection">
+	<div class="ui selection dropdown">
+		<input type="hidden" id="config" name="config">
+		<i class="dropdown icon"></i>
+		<div class="default text">VPN Configuration</div>
+		<div class="menu">
 			{{$selected := .Selected}}
-			{{range .Configs}} 
-				<option value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
+			{{range .Configs}}
+			<div class="item" data-value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
 			{{end}}
-		</select>
-		<button class="button button-blue">Update config</button>
+		</div>
 	</div>
 </form>
 
-<h6>OpenVPN credentials</h6>
-<form class="form form-horizontal" method="post" action="/api/openvpn/credentials">
-	<div class="form_group">
+<h4>OpenVPN credentials</h4>
+
+<form class="ui form" method="post" action="/api/openvpn/credentials">
+	<div class="field">
 		<input name="username" type="text" placeholder="Username" value="{{ .Username }}">
+	</div>
+	<div class="field">
 		<input name="password" type="password" placeholder="Password" value="{{ .Password }}">
 	</div>
-	<div class="form_group">
-		<button class="button button-blue">Update credentials</button> <i class="fa fa-info-circle" aria-hidden="true"></i>
+	<div class="field">
+		<button class="ui basic button"><i class="info circle"></i>Update credentials</button>
 	</div>
 </form>
-<form class="form form-horizontal" method="post" action="/api/openvpn/restart">
-	<div class="form_group">
-		<button class="button button-blue">Restart</button> <i class="fa fa-info-circle" aria-hidden="true"></i>
+
+<form class="ui form" method="post" action="/api/openvpn/restart">
+	<div class="field">
+		<button class="ui basic button"><i class="power off"></i>Restart</button>
 	</div>
 </form>
 
