@@ -4,11 +4,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
-
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lackerman/serverbutler/constants"
