@@ -1,8 +1,8 @@
 # Serverbutler
 
-This app manages openvpn configs for NordVPN
+A little web app that helps manage VPN configs for a server.
 
 Build the app
 ```
-rm -f utils/assets.go && go generate ./... && go build -o bin/serverbutler
+./build.sh
 ```
