@@ -37,7 +37,7 @@ func (c *openvpnHandler) saveConfigDir(ctx *gin.Context) {
 		c.reportError(ctx, err, "Failed to save config dir")
 		return
 	}
-	ctx.Redirect(http.StatusTemporaryRedirect, "/config")
+	ctx.Redirect(http.StatusFound, "/config")
 }
 
 func (c *openvpnHandler) saveSelection(ctx *gin.Context) {
@@ -47,7 +47,7 @@ func (c *openvpnHandler) saveSelection(ctx *gin.Context) {
 		c.reportError(ctx, err, "Failed to save saveSelection")
 		return
 	}
-	ctx.Redirect(http.StatusTemporaryRedirect, "/config")
+	ctx.Redirect(http.StatusFound, "/config")
 }
 
 func (c *openvpnHandler) downloadConfig(ctx *gin.Context) {

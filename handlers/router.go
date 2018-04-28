@@ -15,17 +15,17 @@ func RegisterRoutes(templates *template.Template, db *leveldb.DB) error {
 
 	r.GET("/", HomeHandler("home.html"))
 	r.GET("/ip", IpHandler)
-	r.GET("/config/", NewConfigHandler("config.html", db).get)
+	r.GET("/config", NewConfigHandler("config.html", db).get)
 	r.POST("/api/slack/config", SlackHandler(db))
 
-	openvpn := NewOpenvpnHandler(db)
-	r.Group("/api/openvpn")
+	oh := NewOpenvpnHandler(db)
+	ovpn := r.Group("/api/openvpn")
 
-	r.POST("/config", openvpn.saveConfigDir)
-	r.POST("/selection", openvpn.saveSelection)
-	r.POST("/download", openvpn.downloadConfig)
-	r.POST("/restart", openvpn.restart)
-	r.GET("/credentials", openvpn.credentials)
+	ovpn.POST("/config", oh.saveConfigDir)
+	ovpn.POST("/selection", oh.saveSelection)
+	ovpn.POST("/download", oh.downloadConfig)
+	ovpn.POST("/restart", oh.restart)
+	ovpn.GET("/credentials", oh.credentials)
 
 	r.Run(":3000")
 	return nil
