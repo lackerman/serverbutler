@@ -1,18 +1,36 @@
 package viewmodels
 
+import (
+	"path"
+
+	"github.com/lackerman/serverbutler/constants"
+)
+
+// Site represents the basic variables for a page
+type Site struct {
+	Page    string
+	Heading string
+}
+
+// Prefix returns the uri prefix of the site
+func (Site) Prefix(uri string) string {
+	return path.Join(constants.SitePrefix(), uri)
+}
+
+// Home represents the variables for the home page
 type Home struct {
-	Title   string
-	Heading string
-	IpInfo  *IpInfo
+	Site
+	IPInfo *IPInfo
 }
 
+// Config represents the variables for the config page
 type Config struct {
-	Title   string
-	Heading string
-	OpenVPN OpenVPN
-	Slack   Slack
+	Site
+	OpenVPN
+	Slack
 }
 
+// OpenVPN represents the variables for openvpn section
 type OpenVPN struct {
 	Notification string
 	Username     string
@@ -22,21 +40,23 @@ type OpenVPN struct {
 	ConfigDir    string
 }
 
+// Slack represents the variables for slack section
 type Slack struct {
 	URL string
 }
 
-type IpInfo struct {
-	Ip          string
-	City        string
-	Region      string
-	Country     string
-	Postal      string
-	Latitude    float32
-	Longitude   float32
-	Timezone    string
-	Asn         string
-	Org         string
+// IpInfo represents the variables for ipinfo section
+type IPInfo struct {
+	IP        string
+	City      string
+	Region    string
+	Country   string
+	Postal    string
+	Latitude  float32
+	Longitude float32
+	Timezone  string
+	Asn       string
+	Org       string
 }
 
 // ErrorMessage is the definition of a JSON error message

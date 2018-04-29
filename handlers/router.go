@@ -8,18 +8,20 @@ import (
 )
 
 // RegisterRoutes used by the web app to direct to handlers and static assest handlers
-func RegisterRoutes(templates *template.Template, db *leveldb.DB) error {
+func RegisterRoutes(prefix string, templates *template.Template, db *leveldb.DB) error {
 	r := gin.Default()
 
 	r.SetHTMLTemplate(templates)
 
-	r.GET("/", HomeHandler("home.html"))
-	r.GET("/ip", IpHandler)
-	r.GET("/config", NewConfigHandler("config.html", db).get)
-	r.POST("/api/slack/config", SlackHandler(db))
+	p := r.Group("/" + prefix)
+
+	p.GET("/", HomeHandler("home.html"))
+	p.GET("/ip", IpHandler)
+	p.GET("/config", NewConfigHandler("config.html", db).get)
+	p.POST("/api/slack/config", SlackHandler(db))
 
 	oh := NewOpenvpnHandler(db)
-	ovpn := r.Group("/api/openvpn")
+	ovpn := p.Group("/api/openvpn")
 
 	ovpn.POST("/config", oh.saveConfigDir)
 	ovpn.POST("/selection", oh.saveSelection)

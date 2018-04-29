@@ -4,10 +4,10 @@
 </h2>
 
 <div class="ui secondary pointing menu">
-    <a href="/" class="item {{if eq . "Home" }}active{{ end }}">
+    <a href="{{ .Prefix ""}}" class="item {{if eq .Page "Home" }}active{{ end }}">
         Home
     </a>
-    <a href="/config" class="item {{if eq . "Config" }}active{{ end }}">
+    <a href="{{ .Prefix  "config"}}" class="item {{if eq .Page "Config" }}active{{ end }}">
         Config
     </a>
 </div>

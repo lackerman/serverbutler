@@ -4,6 +4,7 @@ package main
 import (
 	"os"
 
+	"github.com/lackerman/serverbutler/constants"
 	"github.com/lackerman/serverbutler/handlers"
 	"github.com/lackerman/serverbutler/utils"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -22,7 +23,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	if err := handlers.RegisterRoutes(templates, db); err != nil {
+	if err := handlers.RegisterRoutes(constants.SitePrefix(), templates, db); err != nil {
 		panic(err.Error())
 	}
 }

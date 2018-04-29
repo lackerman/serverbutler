@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html>
-{{template "_header.html" .Title}}
+{{template "_header.html" .Site}}
 
 <body>
     <div class="ui container inverted">
-        {{template "_nav.html" .Title}}
+        {{template "_nav.html" .Site}}
         <div class="ui middle aligned stackable grid container">
             <div class="row">
                 <p>Welcome to the home page for managing your Server's OpenVPN configuration.</p>
             </div>
             <div class="row">
                 <p>If you need to change any config, go to the
-                    <a href="/config">Config</a> page</p>
+                    <a href="{{ .Site.Prefix "config"}}">Config</a> page</p>
             </div>
             <div class="row">
-                {{template "ip.html" .IpInfo }}
+                {{template "ip.html" .IPInfo }}
             </div>
         </div>
     </div>

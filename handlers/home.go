@@ -9,16 +9,16 @@ import (
 
 func HomeHandler(template string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ipInfo, err := getIpInfo()
+		ipInfo, err := getIPInfo()
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		ctx.HTML(http.StatusOK, template, viewmodels.Home{
-			Title:   "Home",
+		site := viewmodels.Site{
+			Page:    "Home",
 			Heading: "Serverbutler",
-			IpInfo:  ipInfo,
-		})
+		}
+		ctx.HTML(http.StatusOK, template, viewmodels.Home{Site: site, IPInfo: ipInfo})
 	}
 }

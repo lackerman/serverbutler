@@ -41,7 +41,7 @@ func (c *configController) get(ctx *gin.Context) {
 	}
 
 	ctx.HTML(http.StatusOK, c.template, viewmodels.Config{
-		Title:   "Config",
+		Site:    viewmodels.Site{Heading: "Config"},
 		OpenVPN: *openvpn,
 		Slack:   *slack,
 	})

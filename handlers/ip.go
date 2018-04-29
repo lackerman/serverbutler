@@ -3,15 +3,16 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/lackerman/serverbutler/viewmodels"
-	"github.com/gin-gonic/gin"
 	"bytes"
-	"fmt"
 	"encoding/json"
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lackerman/serverbutler/viewmodels"
 )
 
 func IpHandler(ctx *gin.Context) {
-	ipInfo, err := getIpInfo()
+	ipInfo, err := getIPInfo()
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -20,7 +21,7 @@ func IpHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ipInfo)
 }
 
-func getIpInfo() (*viewmodels.IpInfo, error) {
+func getIPInfo() (*viewmodels.IPInfo, error) {
 	res, err := http.Get("http://ipecho.net/plain")
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func getIpInfo() (*viewmodels.IpInfo, error) {
 	}
 
 	// Return the IP Information from the previous client call
-	ipInfo := &viewmodels.IpInfo{}
+	ipInfo := &viewmodels.IPInfo{}
 	decoder := json.NewDecoder(res.Body)
 	if err := decoder.Decode(ipInfo); err != nil {
 		return nil, err
