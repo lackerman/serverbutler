@@ -46,7 +46,7 @@ func setup(t *testing.T) ([]string, string) {
 	}
 	files := []string{}
 	for i := 1; i <= 3; i++ {
-		file := filepath.Join(p, fmt.Sprintf("file%i.txt", i))
+		file := filepath.Join(p, fmt.Sprintf("file%v.txt", i))
 		files = append(files, file)
 		writeFile(t, file, "hello")
 	}

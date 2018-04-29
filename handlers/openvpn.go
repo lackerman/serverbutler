@@ -1,18 +1,19 @@
 package handlers
 
 import (
-	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/gin-gonic/gin"
-	"log"
-	"github.com/lackerman/serverbutler/utils"
-	"github.com/lackerman/serverbutler/constants"
-	"os"
-	"net/http"
-	"github.com/lackerman/serverbutler/viewmodels"
-	"path/filepath"
 	"fmt"
-	"os/exec"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lackerman/serverbutler/constants"
+	"github.com/lackerman/serverbutler/utils"
+	"github.com/lackerman/serverbutler/viewmodels"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 type openvpnHandler struct {
@@ -126,5 +127,5 @@ func (c *openvpnHandler) restart(ctx *gin.Context) {
 func (c *openvpnHandler) reportError(ctx *gin.Context, err error, m string) {
 	msg := fmt.Sprintf("%v. Error: %v", m, err.Error())
 	c.logger.Printf(msg)
-	ctx.JSON(http.StatusInternalServerError, &viewmodels.ErrorMessage{m})
+	ctx.JSON(http.StatusInternalServerError, &viewmodels.ErrorMessage{Message: m})
 }
