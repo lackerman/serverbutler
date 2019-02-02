@@ -32,22 +32,31 @@ func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("calling http://ipecho.net/plain was unsuccessful: %v", res.StatusCode)
+	// Get the response body
+	bites, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("calling http://ipecho.net/plain was unsuccessful. failed to read response body: %+v", err)
 	}
-
-	// Get the IP
-	body, err := ioutil.ReadAll(res.Body)
-	ip := string(body)
+	ip := string(bites)
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("calling http://ipecho.net/plain was unsuccessful. %d: %v", res.StatusCode, ip)
+	}
 
 	// Query the information using the IP
 	res, err = client.Get(fmt.Sprintf("https://ipapi.co/%v/json", ip))
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful: %v", res.StatusCode)
+		b, err1 := ioutil.ReadAll(res.Body)
+		if err1 != nil {
+			return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful. %d: %+v", ip, res.StatusCode, err1)
+		}
+		return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful. %d: %+v", ip, res.StatusCode, string(b))
 	}
 
 	// Return the IP Information from the previous client call
