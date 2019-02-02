@@ -24,24 +24,28 @@ type configController struct {
 }
 
 func NewConfigHandler(t string, db *leveldb.DB) *configController {
-	return &configController{db: db, template: t, logger: log.New(os.Stdout, "handler :: config - ", log.LstdFlags)}
+	return &configController{
+		db:       db,
+		template: t,
+		logger:   log.New(os.Stdout, "handler :: config - ", log.LstdFlags),
+	}
 }
 
 func (c *configController) get(ctx *gin.Context) {
 	slack, err := c.slack()
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	openvpn, err := c.openvpn()
 	if err != nil {
-		ctx.Error(err)
+		_ = ctx.Error(err)
 		return
 	}
 
 	ctx.HTML(http.StatusOK, c.template, viewmodels.Config{
-		Site:    viewmodels.Site{Heading: "Config"},
+		Site:    viewmodels.Site{Page: "Config"},
 		OpenVPN: *openvpn,
 		Slack:   *slack,
 	})

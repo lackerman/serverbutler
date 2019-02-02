@@ -1,9 +1,10 @@
 package handlers
 
 import (
+	"io/ioutil"
 	"net/http"
+	"time"
 
-	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -12,7 +13,12 @@ import (
 )
 
 func IpHandler(ctx *gin.Context) {
-	ipInfo, err := getIPInfo()
+	client := &http.Client{
+		Timeout:   3 * time.Second,
+		Transport: &http.Transport{},
+	}
+
+	ipInfo, err := getIPInfo(client)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -21,20 +27,27 @@ func IpHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, ipInfo)
 }
 
-func getIPInfo() (*viewmodels.IPInfo, error) {
-	res, err := http.Get("http://ipecho.net/plain")
+func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {
+	res, err := client.Get("http://ipecho.net/plain")
 	if err != nil {
 		return nil, err
 	}
 
-	// Get the IP
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(res.Body)
-	ip := buf.String()
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("calling http://ipecho.net/plain was unsuccessful: %v", res.StatusCode)
+	}
 
-	res, err = http.Get(fmt.Sprintf("https://ipapi.co/%v/json", ip))
+	// Get the IP
+	body, err := ioutil.ReadAll(res.Body)
+	ip := string(body)
+
+	// Query the information using the IP
+	res, err = client.Get(fmt.Sprintf("https://ipapi.co/%v/json", ip))
 	if err != nil {
 		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful: %v", res.StatusCode)
 	}
 
 	// Return the IP Information from the previous client call
