@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {{template "_header.html" .Site}}
 
 <body>
@@ -7,6 +7,14 @@
         {{template "_nav.html" .Site}}
         <div class="ui aligned stackable grid container">
             <div class="row">
+                {{if .Notification}}
+                    {{if eq .Notification.Type "info"}}
+                        {{template "_notification.html" .Notification }}
+                    {{end}}
+                    {{if eq .Notification.Type "error"}}
+                        {{template "_notification.html" .Notification }}
+                    {{end}}
+                {{end}}
                 <div class="eight wide column">
                     {{template "openvpn.html" .OpenVPN}}
                 </div>
@@ -16,6 +24,7 @@
             </div>
         </div>
     </div>
+    {{template "_footer.html"}}
 </body>
 
 </html>

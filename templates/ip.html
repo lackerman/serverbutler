@@ -1,44 +1,28 @@
 <h3 class="ui header">IP Information</h3>
 
 <table id="ipInfo" class="ui compact celled striped table">
-    <tr>
-        <td>ip</td>
-        <td>{{ .IP }}</td>
-    </tr>
-    <tr>
-        <td>city</td>
-        <td>{{ .City }}</td>
-    </tr>
-    <tr>
-        <td>region</td>
-        <td>{{ .Region }}</td>
-    </tr>
-    <tr>
-        <td>country</td>
-        <td>{{ .Country }}</td>
-    </tr>
-    <tr>
-        <td>postal</td>
-        <td>{{ .Postal }}</td>
-    </tr>
-    <tr>
-        <td>latitude</td>
-        <td>{{ .Latitude }}</td>
-    </tr>
-    <tr>
-        <td>longitude</td>
-        <td>{{ .Longitude }}</td>
-    </tr>
-    <tr>
-        <td>timezone</td>
-        <td>{{ .Timezone }}</td>
-    </tr>
-    <tr>
-        <td>asn</td>
-        <td>{{ .Asn }}</td>
-    </tr>
-    <tr>
-        <td>org</td>
-        <td>{{ .Org }}</td>
-    </tr>
 </table>
+<button id="refresh" class="ui button primary">Refresh</button>
+
+<script type="application/javascript">
+    document
+        .getElementById('refresh')
+        .addEventListener('click', () =>
+            fetch('/ip')
+                .then(res => {
+                    if (!res.ok) {
+                        console.log(res);
+                        throw Error(res.statusText);
+                    }
+                    return res.json()
+                })
+                .then(json => {
+                    const rows = Object.keys(json).map(k => `<tr><td>${k}</td><td>${json[k]}</td></tr>`).join('\n');
+                    const table = document.getElementById("ipInfo");
+                    table.innerHTML = rows;
+                })
+                .catch(error => {
+                    const table = document.getElementById("ipInfo");
+                    table.innerHTML = `<tr><td>${error}</td></tr>`;
+                }));
+</script>

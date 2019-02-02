@@ -1,27 +1,7 @@
 <head>
-    <meta charset="utf-8" />
     <title>{{ .Page }}</title>
 
     <!-- Semantic UI -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/components/icon.min.css" />
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.1/semantic.min.js"></script>
-
-    <!-- Application CSS Styles -->
-    <script type="text/javascript">
-        function getData(url, callback) {
-            const request = new XMLHttpRequest();
-            request.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    if (this.status == 200) {
-                        callback(request.responseText, null);
-                    } else {
-                        callback(null, this.status);
-                    }
-                }
-            };
-            request.open("GET", url, true);
-            request.send();
-        }
-    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/icon.min.css" />
 </head>

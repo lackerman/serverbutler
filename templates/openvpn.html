@@ -1,65 +1,59 @@
-{{if .Notification}}
-	{{if eq .Notification.Type "info"}}
-		{{template "_notification.html" .Notification }}
-	{{end}}
-	{{if eq .Notification.Type "error"}}
-		{{template "_notification.html" .Notification }}
-	{{end}}
-{{end}}
+<h3>OpenVPN</h3>
 
-<h4>OpenVPN configuration</h4>
+<h4>1. Select config directory</h4>
 <form class="ui form" method="post" action="/api/openvpn/config">
-	<div class="field">
-		<input name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
-	</div>
-	<button class="ui button primary" type="submit">Update</button>
-	<button class="ui button icon" id="download"><i class="download"></i></button>
+    <div class="ui fluid left icon right action input">
+        <i class="folder open icon"></i>
+        <input name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
+        <button class="ui button primary" type="submit">Set config directory</button>
+    </div>
 </form>
 
+<h4>2. Download config</h4>
+<button id="download" class="ui labeled icon button"><i class="download icon"></i>Download configs</button>
+
+<h4>3. Select config to use</h4>
 <form class="ui form" method="post" action="/api/openvpn/selection">
-	<div class="ui selection dropdown">
-		<input type="hidden" id="config" name="config">
-		<i class="dropdown icon"></i>
-		<div class="default text">VPN Configuration</div>
-		<div class="menu">
-			{{$selected := .Selected}}
-			{{range .Configs}}
-			<div class="item" data-value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
-			{{end}}
-		</div>
-	</div>
+    <div class="ui fluid selection dropdown">
+        <input type="hidden" id="config" name="config">
+        <i class="dropdown icon"></i>
+        <div class="default text">Select VPN Configuration</div>
+        <div class="menu">
+            {{$selected := .Selected}}
+            {{range .Configs}}
+                <div class="item" data-value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
+            {{end}}
+        </div>
+    </div>
 </form>
 
-<h4>OpenVPN credentials</h4>
-
+<h4>4. Set config credentials</h4>
 <form class="ui form" method="post" action="/api/openvpn/credentials">
-	<div class="field">
-		<input name="username" type="text" placeholder="Username" value="{{ .Username }}">
-	</div>
-	<div class="field">
-		<input name="password" type="password" placeholder="Password" value="{{ .Password }}">
-	</div>
-	<div class="field">
-		<button class="ui basic button"><i class="info circle"></i>Update credentials</button>
-	</div>
+    <div class="field">
+        <input name="username" type="text" placeholder="Username" value="{{ .Username }}">
+    </div>
+    <div class="field">
+        <input name="password" type="password" placeholder="Password" value="{{ .Password }}">
+    </div>
+    <div class="field">
+        <button class="ui basic button"><i class="info circle"></i>Update credentials</button>
+    </div>
 </form>
 
+<h4>5. Restart VPN connection</h4>
 <form class="ui form" method="post" action="/api/openvpn/restart">
-	<div class="field">
-		<button class="ui basic button"><i class="power off"></i>Restart</button>
-	</div>
+    <div class="field">
+        <button class="ui red button"><i class="power off"></i>Restart</button>
+    </div>
 </form>
 
 <script>
-const loading = document.getElementById("loading");
-const btn = document.getElementById("download");
-const icon = document.getElementById("icon");
-btn.addEventListener("click", (evt) => {
-	icon.style.display = "none";
-	loading.style.display = "block";
-	getData('/api/openvpn/download', (text, err) => {
-		icon.style.display = "block";
-		loading.style.display = "none";
-	});
-});
+    document.getElementById("download").addEventListener('click', () => {
+        fetch('/api/openvpn/download', {method: 'POST'})
+            .then(res => {
+                if (!res.ok) {
+                    console.log(res)
+                }
+            });
+    });
 </script>

@@ -1,0 +1,48 @@
+<h3>Command to execute</h3>
+
+<div class="ui basic vertical segment">
+    <div class="ui fluid labeled action input">
+        <div class="ui label">$</div>
+        <input id="cmd" style="font-family: monospace" type="text" placeholder="Command to execute">
+        <button id="execute" class="ui red right button">Execute</button>
+    </div>
+</div>
+<div id="loader" class="ui basic vertical segment" style="display: none">
+    <p></p>
+    <div class="ui active inverted dimmer">
+        <div class="ui text loader">Loading</div>
+    </div>
+    <p></p>
+</div>
+<div class="ui fluid form">
+    <div class="field">
+        <textarea id="output" style="font-family: monospace"></textarea>
+    </div>
+</div>
+
+<script type="application/javascript">
+    function showOutput(content) {
+        const frame = document.getElementById('output');
+        frame.value = content;
+        document.getElementById('loader').style.display = "none";
+        frame.style.display = "block";
+    }
+
+    document
+        .getElementById('execute')
+        .addEventListener('click', () => {
+            document.getElementById('loader').style.display = "block";
+
+            fetch('/cmd', {method: 'POST', body: document.getElementById('cmd').value})
+                .then(res => {
+                    if (!res.ok) {
+                        console.log(res);
+                        throw Error(`${res.statusText}: ${res.text()}`);
+                    }
+                    return res.text();
+                })
+                .then(text => showOutput(text))
+                .catch(error => showOutput(error));
+        });
+
+</script>

@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 {{template "_header.html" .Site}}
 
 <body>
-    <div class="ui container inverted">
+<div class="ui container">
+    <div class="full height">
         {{template "_nav.html" .Site}}
-        <div class="ui middle aligned stackable grid container">
-            <div class="row">
-                <p>Welcome to the home page for managing your Server's OpenVPN configuration.</p>
-            </div>
-            <div class="row">
-                <p>If you need to change any config, go to the
-                    <a href="{{ .Site.Prefix "config"}}">Config</a> page</p>
-            </div>
-            <div class="row">
-                {{template "ip.html" .IPInfo }}
-            </div>
+        <div class="ui basic vertical segment">
+            <p>Welcome to the home page for managing your Server's configuration.</p>
+
+            <p>If you need to change any config, go to the
+                <a href="{{ .Site.Prefix "config"}}">Config</a> page</p>
+        </div>
+        <div class="ui basic vertical segment">
+            {{template "ip.html" }}
+        </div>
+        <div class="ui basic vertical segment">
+            {{template "cmd.html" }}
         </div>
     </div>
+</div>
+
+{{template "_footer.html" .Site}}
 </body>
 
 </html>

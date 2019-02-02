@@ -1,7 +1,8 @@
-<h4>Slack Config</h4>
+<h3>Slack Config</h3>
+
 <form class="ui form" method="post" action="/api/slack/config">
-	<div class="field">
-    <input name="webhook" type="text" placeholder="Slack Webhook URL" value="{{ .URL }}">
-  </div>
-  <button class="ui button primary">Update Slack Config</button>
+    <div class="field">
+        <input name="webhook" type="text" placeholder="Slack Webhook URL" value="{{ .URL }}">
+    </div>
+    <button class="ui button primary">Update Slack Config</button>
 </form>
