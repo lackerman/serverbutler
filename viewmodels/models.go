@@ -8,8 +8,7 @@ import (
 
 // Site represents the basic variables for a page
 type Site struct {
-	Page    string
-	Heading string
+	Page string
 }
 
 // Prefix returns the uri prefix of the site
@@ -20,7 +19,6 @@ func (Site) Prefix(uri string) string {
 // Home represents the variables for the home page
 type Home struct {
 	Site
-	IPInfo *IPInfo
 }
 
 // Config represents the variables for the config page
