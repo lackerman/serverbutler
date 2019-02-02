@@ -6,10 +6,8 @@ ENV config_dir=$config_dir
 
 WORKDIR /opt/sb
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates curl
 
-EXPOSE 3000
+CMD ["serverbutler"]
 
-CMD ["./serverbutler"]
-
-COPY bin/serverbutler .
+COPY bin/serverbutler /bin/serverbutler

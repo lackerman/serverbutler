@@ -9,6 +9,7 @@ tmp/
 
 # IntelliJ/Goland
 .idea/
+*.iml
 
 # vscode
 .vscode
