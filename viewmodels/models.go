@@ -3,7 +3,7 @@ package viewmodels
 import (
 	"path"
 
-	"github.com/lackerman/serverbutler/constants"
+	"gitlab.com/lackerman/serverbutler/constants"
 )
 
 // Site represents the basic variables for a page

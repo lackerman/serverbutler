@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/gin-gonic/gin"
-	"github.com/lackerman/serverbutler/constants"
+	"github.com/syndtr/goleveldb/leveldb"
+	"gitlab.com/lackerman/serverbutler/constants"
+	"gitlab.com/lackerman/serverbutler/viewmodels"
 	"net/http"
-	"github.com/lackerman/serverbutler/viewmodels"
 )
 
 func SlackHandler(db *leveldb.DB) gin.HandlerFunc {

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lackerman/serverbutler/viewmodels"
+	"gitlab.com/lackerman/serverbutler/viewmodels"
 )
 
 func HomeHandler(template string) gin.HandlerFunc {

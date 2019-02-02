@@ -4,9 +4,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/lackerman/serverbutler/handlers"
-	"github.com/lackerman/serverbutler/utils"
 	"github.com/syndtr/goleveldb/leveldb"
+	"gitlab.com/lackerman/serverbutler/handlers"
+	"gitlab.com/lackerman/serverbutler/utils"
 	"net/http"
 )
 
