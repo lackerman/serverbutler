@@ -1,13 +1,25 @@
+# build stage
+FROM golang:alpine AS build-env
+RUN apk --no-cache add build-base git bzr mercurial gcc make
+ENV GO111MODULE=on
+
+WORKDIR /app
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+COPY . .
+RUN make build
+
+# final stage
 FROM alpine
 LABEL AUTHOR=lackerman
 
-ARG config_dir=/tmp
-ENV config_dir=$config_dir
-
-WORKDIR /opt/sb
-
+WORKDIR /opt
 RUN apk add --no-cache ca-certificates curl
 
-CMD ["serverbutler"]
+ENTRYPOINT ["./app"]
 
-COPY bin/serverbutler /bin/serverbutler
+COPY --from=build-env /app/bin/app ./app
+COPY --from=build-env /app/templates/* ./templates/

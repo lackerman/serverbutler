@@ -1,23 +1,33 @@
-.PHONY: clean
-all: clean generate build
+PROJECTNAME=$(shell basename "$(PWD)")
+
+.PHONY: all
+all: clean build
 
 .PHONY: clean
 clean:
-	rm -f utils/assets.go
+	rm -rf bin/*
 
-.PHONY: generate
-generate:
-	go generate ./...
+build: main.go
+	GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) CGO_ENABLED=0 go build -o bin/$(PROJECTNAME)
+
+build-arm: main.go
+	@$(MAKE) build GOOS=linux GOARCH=arm GOARM=7
+
+.PHONY: docker
+docker:
+	docker build -t $(PROJECTNAME) .
 
 .PHONY: run
-run: generate
-	go build -o bin/serverbutler
-	bin/serverbutler
+run:
+	@air
 
-.PHONY: build
-build:
-	CGO_ENABLED=0 GOOS=linux go build -o bin/serverbutler
+.PHONY: copy
+copy: check-server clean docker
+	docker save --output $(PROJECTNAME).tar $(PROJECTNAME):latest
+	scp $(PROJECTNAME).tar $(SERVER_NAME):.
+	rm $(PROJECTNAME).tar
 
-.PHONY: docker-build
-docker: build
-	docker build -t serverbutler .
+check-server:
+ifndef SERVER_NAME
+	$(error SERVER_NAME is undefined)
+endif
