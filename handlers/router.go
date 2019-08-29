@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/lackerman/serverbutler/constants"
 	"html/template"
 	"net/http"
 
@@ -11,10 +12,11 @@ import (
 // RegisterRoutes used by the web app to configure handlers to paths
 func RegisterRoutes(templates *template.Template, db *leveldb.DB) http.Handler {
 	r := gin.Default()
-
 	r.SetHTMLTemplate(templates)
 
-	p := r.Group("/")
+	root := r.Group("/"+constants.SitePrefix())
+
+	p := root.Group("/")
 	p.GET("/", HomeHandler("home.html"))
 	p.GET("/ip", IpHandler)
 	p.POST("/cmd", CmdHandler)
@@ -22,7 +24,7 @@ func RegisterRoutes(templates *template.Template, db *leveldb.DB) http.Handler {
 	p.POST("/api/slack/config", SlackHandler(db))
 
 	oh := NewOpenvpnHandler(db)
-	o := p.Group("/api/openvpn")
+	o := root.Group("/api/openvpn")
 	o.POST("/config", oh.saveConfigDir)
 	o.POST("/selection", oh.saveSelection)
 	o.POST("/download", oh.downloadConfig)

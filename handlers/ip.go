@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.com/lackerman/serverbutler/viewmodels"
+	"github.com/lackerman/serverbutler/viewmodels"
 )
 
 func IpHandler(ctx *gin.Context) {

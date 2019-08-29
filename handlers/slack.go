@@ -3,8 +3,8 @@ package handlers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/syndtr/goleveldb/leveldb"
-	"gitlab.com/lackerman/serverbutler/constants"
-	"gitlab.com/lackerman/serverbutler/viewmodels"
+	"github.com/lackerman/serverbutler/constants"
+	"github.com/lackerman/serverbutler/viewmodels"
 	"net/http"
 )
 

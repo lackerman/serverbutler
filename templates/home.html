@@ -5,7 +5,7 @@
 <body>
 <div class="ui container">
     <div class="full height">
-        {{template "_nav.html" .Site}}
+        {{ template "_nav.html" .Site }}
         <div class="ui basic vertical segment">
             <p>Welcome to the home page for managing your Server's configuration.</p>
 
@@ -13,10 +13,10 @@
                 <a href="{{ .Site.Prefix "config"}}">Config</a> page</p>
         </div>
         <div class="ui basic vertical segment">
-            {{template "ip.html" }}
+            {{ template "ip.html" . }}
         </div>
         <div class="ui basic vertical segment">
-            {{template "cmd.html" }}
+            {{ template "cmd.html" }}
         </div>
     </div>
 </div>

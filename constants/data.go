@@ -14,5 +14,5 @@ const (
 
 // SitePrefix returns the uri prefix of the site
 func SitePrefix() string {
-	return path.Join("/", os.Getenv("site_prefix"))
+	return path.Join("/", os.Getenv("SITE_PREFIX"))
 }
