@@ -20,7 +20,7 @@ func IpHandler(ctx *gin.Context) {
 
 	ipInfo, err := getIPInfo(client)
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, err.Error())
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -45,7 +45,7 @@ func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {
 	}
 
 	// Query the information using the IP
-	res, err = client.Get(fmt.Sprintf("https://ipapi.co/%v/json", ip))
+	res, err = client.Get(fmt.Sprintf("http://ip-api.com/json/%v", ip))
 	if err != nil {
 		return nil, err
 	}
@@ -54,9 +54,9 @@ func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {
 	if res.StatusCode != http.StatusOK {
 		b, err1 := ioutil.ReadAll(res.Body)
 		if err1 != nil {
-			return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful. %d: %+v", ip, res.StatusCode, err1)
+			return nil, fmt.Errorf("calling http://ip-api.com/json/%v was unsuccessful. %d: %+v", ip, res.StatusCode, err1)
 		}
-		return nil, fmt.Errorf("calling https://ipapi.co/%v/json was unsuccessful. %d: %+v", ip, res.StatusCode, string(b))
+		return nil, fmt.Errorf("calling http://ip-api.com/json/%v was unsuccessful. %d: %+v", ip, res.StatusCode, string(b))
 	}
 
 	// Return the IP Information from the previous client call
@@ -65,5 +65,6 @@ func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {
 	if err := decoder.Decode(ipInfo); err != nil {
 		return nil, err
 	}
+
 	return ipInfo, nil
 }

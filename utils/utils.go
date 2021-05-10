@@ -5,10 +5,8 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -64,10 +62,9 @@ func SearchAndReplace(path string, fileMask string, search string, replace strin
 					return err
 				}
 				if read[len(read)-1] == 10 {
-					read = read[0: len(read)-1]
+					read = read[0 : len(read)-1]
 				}
 				newContents := strings.Replace(string(read), search, replace, 1)
-				fmt.Printf("|%s|%s|", read, newContents)
 				err = ioutil.WriteFile(filePath, []byte(newContents), 0)
 				if err != nil {
 					return err
@@ -117,7 +114,7 @@ func UnzipFile(dst string, filename string) error {
 	// Open a zip archive for reading.
 	r, err := zip.OpenReader(filename)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer r.Close()
 

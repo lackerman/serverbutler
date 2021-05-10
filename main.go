@@ -3,10 +3,13 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
+
 	"github.com/lackerman/serverbutler/handlers"
 	"github.com/syndtr/goleveldb/leveldb"
-	"html/template"
-	"net/http"
+
+	"k8s.io/klog/v2"
+	"k8s.io/klog/v2/klogr"
 )
 
 func main() {
@@ -14,16 +17,20 @@ func main() {
 	path := flag.String("path", "./bin/tmp", "The file path to use for level db")
 	flag.Parse()
 
-	templates := template.Must(template.ParseGlob("templates/*"))
+	klog.InitFlags(nil)
+
+	logger := klogr.New().WithName("serverbutler")
+	logger.V(0).Info("starting app", "port", port, "path", path)
+
 	// The returned DB instance is safe for concurrent use. Which means that all
 	// DB's methods may be called concurrently from multiple goroutines.
 	db, err := leveldb.OpenFile(*path, nil)
 	if err != nil {
-		panic(err.Error())
+		logger.Error(err, "failed to open the connection to leveldb")
 	}
 
-	router := handlers.RegisterRoutes(templates, db)
-	if err := http.ListenAndServe(fmt.Sprintf(":%d", *port), router); err != nil {
-		panic(err.Error())
+	router := handlers.RegisterRoutes(logger, db)
+	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *port), router); err != nil {
+		logger.Error(err, "failed to start up the server")
 	}
 }

@@ -1,11 +1,11 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/lackerman/serverbutler/constants"
-	"github.com/lackerman/serverbutler/viewmodels"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/lackerman/serverbutler/constants"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 func SlackHandler(db *leveldb.DB) gin.HandlerFunc {
@@ -13,7 +13,7 @@ func SlackHandler(db *leveldb.DB) gin.HandlerFunc {
 		url := ctx.PostForm("webhook")
 		err := db.Put([]byte(constants.SlackURLKey), []byte(url), nil)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, &viewmodels.ErrorMessage{Message: "Failed to save slack config"})
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 

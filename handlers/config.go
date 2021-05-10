@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-logr/logr"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 
@@ -20,28 +19,28 @@ import (
 
 type configController struct {
 	db       *leveldb.DB
-	logger   *log.Logger
+	logger   logr.Logger
 	template string
 }
 
-func NewConfigHandler(t string, db *leveldb.DB) *configController {
+func NewConfigHandler(t string, db *leveldb.DB, logger logr.Logger) *configController {
 	return &configController{
 		db:       db,
 		template: t,
-		logger:   log.New(os.Stdout, "handler :: config - ", log.LstdFlags),
+		logger:   logger,
 	}
 }
 
 func (c *configController) get(ctx *gin.Context) {
 	slack, err := c.slack()
 	if err != nil {
-		_ = ctx.Error(err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
 	openvpn, err := c.openvpn()
 	if err != nil {
-		_ = ctx.Error(err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -53,7 +52,7 @@ func (c *configController) get(ctx *gin.Context) {
 }
 
 func (c *configController) openvpn() (*viewmodels.OpenVPN, error) {
-	c.logger.Println("openvpn - retrieving configs")
+	c.logger.V(4).Info("openvpn - retrieving configs")
 
 	var configs []string
 	selected, username, password, dir := "", "", "", ""
@@ -78,10 +77,15 @@ func (c *configController) openvpn() (*viewmodels.OpenVPN, error) {
 		dir = string(b)
 	}
 
+	c.logger.V(4).Info("Openvpn Dir: %+v", dir)
 	if b != nil {
 		configs, err = retrieveConfigs(dir)
 		if err != nil {
+			c.logger.V(4).Info("%+v", err)
 			return nil, err
+		}
+		for _, cfg := range configs {
+			c.logger.V(4).Info("%v\n", cfg)
 		}
 		username, password = retrieveCredentials(dir)
 	}
@@ -114,7 +118,7 @@ func retrieveCredentials(dir string) (string, string) {
 }
 
 func (c *configController) slack() (*viewmodels.Slack, error) {
-	c.logger.Println("slack - getting config")
+	c.logger.V(4).Info("slack - getting config")
 	url := ""
 	b, err := c.db.Get([]byte(constants.SlackURLKey), nil)
 	if err != nil {
