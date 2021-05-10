@@ -1,13 +1,54 @@
-<div class="ui basic vertical segment">
-    <h2 class="ui center aligned header">
-        <i class="hdd outline icon"></i>Serverbutler
-    </h2>
-</div>
-<div class="ui menu">
-    <a href="{{ .Prefix ""}}" class="item {{if eq .Page "Home" }}active{{ end }}">
-        Home
-    </a>
-    <a href="{{ .Prefix  "config"}}" class="item {{if eq .Page "Config" }}active{{ end }}">
-        Config
-    </a>
-</div>
+<section class="hero is-info">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">Serverbutler</h1>
+            <h2 class="subtitle">How may I be of service?</h2>
+        </div>
+    </div>
+</section>
+
+
+<nav class="navbar is-light" role="navigation" aria-label="main navigation">
+    <div class="container">
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item {{if eq .Page " Home" }}is-active{{ end }}" href="{{ .Prefix ""}}">
+                    Home
+                </a>
+
+                <a class="navbar-item {{if eq .Page " Config" }}is-active{{ end }}" href="{{ .Prefix  "config"}}">
+                    Config
+                </a>
+
+                <a class="navbar-item {{if eq .Page " Commands" }}is-active{{ end }}" href="{{ .Prefix  "commands"}}">
+                    Commands
+                </a>
+
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link">
+                        More
+                    </a>
+
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item">
+                            About
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-info">
+                            <strong>Sign up</strong>
+                        </a>
+                        <a class="button">
+                            Log in
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

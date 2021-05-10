@@ -3,24 +3,22 @@
 {{template "_header.html" .Site}}
 
 <body>
-    <div class="ui container">
-        {{template "_nav.html" .Site}}
-        <div class="ui aligned stackable grid container">
-            <div class="row">
-                {{if .Notification}}
-                    {{if eq .Notification.Type "info"}}
-                        {{template "_notification.html" .Notification }}
-                    {{end}}
-                    {{if eq .Notification.Type "error"}}
-                        {{template "_notification.html" .Notification }}
-                    {{end}}
-                {{end}}
-                <div class="eight wide column">
-                    {{template "openvpn.html" .OpenVPN}}
-                </div>
-                <div class="eight wide column">
-                    {{template "slack.html" .Slack}} {{template "transmission.html"}}
-                </div>
+    {{template "_nav.html" .Site}}
+    <div class="container mt-4">
+        {{if .Notification}}
+            {{if eq .Notification.Type "info"}}
+                {{template "_notification.html" .Notification }}
+            {{end}}
+            {{if eq .Notification.Type "error"}}
+                {{template "_notification.html" .Notification }}
+            {{end}}
+        {{end}}
+        <div class="columns">
+            <div class="column">
+                {{template "openvpn.html" .OpenVPN}}
+            </div>
+            <div class="column">
+                {{template "slack.html" .Slack}} {{template "transmission.html"}}
             </div>
         </div>
     </div>

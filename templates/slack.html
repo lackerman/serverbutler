@@ -1,8 +1,16 @@
-<h3>Slack Config</h3>
-
-<form class="ui form" method="post" action="/api/slack/config">
-    <div class="field">
-        <input name="webhook" type="text" placeholder="Slack Webhook URL" value="{{ .URL }}">
+<h4 class="title is-4">Slack Config</h4>
+<form method="post" action="/api/slack/config">
+    <div class="field has-addons">
+        <div class="control">
+            <input class="input" name="webhook" type="text" placeholder="Slack Webhook URL" value="{{ .URL }}">
+        </div>
+        <div class="control">
+            <button type="submit" class="button is-info">
+                <span class="icon is-small">
+                    <ion-icon name="save-outline"></ion-icon>
+                </span>
+                <span>Update Slack Config</span>
+            </button>
+        </div>
     </div>
-    <button class="ui button primary">Update Slack Config</button>
 </form>

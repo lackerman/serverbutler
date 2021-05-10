@@ -1,55 +1,78 @@
-<h3>OpenVPN</h3>
+<h4 class="title is-4">OpenVPN</h4>
 
-<h4>1. Select config directory</h4>
-<form class="ui form" method="post" action="/api/openvpn/config">
-    <div class="ui fluid left icon right action input">
-        <i class="folder open icon"></i>
-        <input name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
-        <button class="ui button primary" type="submit">Set config directory</button>
-    </div>
-</form>
-
-<h4>2. Download config</h4>
-<button id="download" class="ui labeled icon button"><i class="download icon"></i>Download configs</button>
-
-<h4>3. Select config to use</h4>
-<form class="ui form" method="post" action="/api/openvpn/selection">
-    <div class="ui fluid selection dropdown">
-        <input type="hidden" id="config" name="config">
-        <i class="dropdown icon"></i>
-        <div class="default text">Select VPN Configuration</div>
-        <div class="menu">
-            {{$selected := .Selected}}
-            {{range .Configs}}
-                <div class="item" data-value="{{ . }}" {{if eq . $selected }}selected{{end}}>{{ . }}</div>
-            {{end}}
+<h5 class="title is-5 mt-4">1. Select config directory</h5>
+<form method="post" action="/api/openvpn/config">
+    <div class="field has-addons">
+        <div class="control">
+            <input class="input" name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
+        </div>
+        <div class="control">
+            <button type="submit" class="button is-info">
+                <span class="icon is-small">
+                    <ion-icon name="folder-open-outline"></ion-icon>
+                </span>
+                <span>Set config directory</span>
+            </button>
         </div>
     </div>
 </form>
 
-<h4>4. Set config credentials</h4>
-<form class="ui form" method="post" action="/api/openvpn/credentials">
-    <div class="field">
-        <input name="username" type="text" placeholder="Username" value="{{ .Username }}">
-    </div>
-    <div class="field">
-        <input name="password" type="password" placeholder="Password" value="{{ .Password }}">
-    </div>
-    <div class="field">
-        <button class="ui basic button"><i class="info circle"></i>Update credentials</button>
+<h5 class="title is-5 mt-4">2. Download config</h5>
+<button id="download" class="button is-info">
+    <span class="icon is-small">
+        <ion-icon name="cloud-download-outline"></ion-icon>
+    </span>
+    <span>Download configs</span>
+</button>
+
+<h5 class="title is-5 mt-4">3. Select config to use</h5>
+<form method="post" action="/api/openvpn/selection">
+    <div class="dropdown is-active">
+        <div class="dropdown-trigger">
+            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                <span>Select config</span>
+                <span class="icon is-small">
+                    <ion-icon name="chevron-down-outline"></ion-icon>
+                </span>
+            </button>
+        </div>
+
+        <div class="dropdown-menu" id="dropdown-menu" role="menu">
+            <div class="dropdown-content">
+                {{$selected := .Selected}}
+                {{range .Configs}}
+                <a class="dropdown-item {{if eq . $selected }}is-active{{end}}"> value="{{ . }}" >{{ . }}</a>
+                {{end}}
+            </div>
+        </div>
     </div>
 </form>
 
-<h4>5. Restart VPN connection</h4>
-<form class="ui form" method="post" action="/api/openvpn/restart">
+<h5 class="title is-5 mt-4">4. Set config credentials</h5>
+<form method="post" action="/api/openvpn/credentials">
+    <input class="input" name="username" type="text" placeholder="Username" value="{{ .Username }}">
+    <input class="input mt-2" name="password" type="password" placeholder="Password" value="{{ .Password }}">
+    <button class="button mt-2">
+        <span class="icon is-small">
+            <ion-icon name="save-outline"></ion-icon>
+        </span>
+        <span>Update credentials</span>
+    </button>
+</form>
+
+<h5 class="title is-5 mt-4">5. Restart VPN connection</h5>
+<form method="post" action="/api/openvpn/restart">
     <div class="field">
-        <button class="ui red button"><i class="power off"></i>Restart</button>
+        <button class="button is-danger">
+            <ion-icon name="power-outline"></ion-icon>
+            <span> Restart</span>
+        </button>
     </div>
 </form>
 
 <script>
     document.getElementById("download").addEventListener('click', () => {
-        fetch('/api/openvpn/download', {method: 'POST'})
+        fetch('/api/openvpn/download', { method: 'POST' })
             .then(res => {
                 if (!res.ok) {
                     console.log(res)
