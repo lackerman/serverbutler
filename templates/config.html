@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-{{template "_header.html" .Site}}
+{{template "header.html" .}}
 
 <body>
-    {{template "_nav.html" .Site}}
+    {{template "nav.html" .}}
     <div class="container mt-4">
         {{if .Notification}}
             {{if eq .Notification.Type "info"}}
-                {{template "_notification.html" .Notification }}
+                {{template "notification.html" .Notification }}
             {{end}}
             {{if eq .Notification.Type "error"}}
-                {{template "_notification.html" .Notification }}
+                {{template "notification.html" .Notification }}
             {{end}}
         {{end}}
         <div class="columns">
@@ -22,7 +22,7 @@
             </div>
         </div>
     </div>
-    {{template "_footer.html"}}
+    {{template "footer.html"}}
 </body>
 
 </html>

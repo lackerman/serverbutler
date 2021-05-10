@@ -12,19 +12,21 @@ import (
 	"github.com/lackerman/serverbutler/viewmodels"
 )
 
-func IpHandler(ctx *gin.Context) {
-	client := &http.Client{
-		Timeout:   3 * time.Second,
-		Transport: &http.Transport{},
-	}
+func IpHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		client := &http.Client{
+			Timeout:   3 * time.Second,
+			Transport: &http.Transport{},
+		}
 
-	ipInfo, err := getIPInfo(client)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+		ipInfo, err := getIPInfo(client)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 
-	ctx.JSON(http.StatusOK, ipInfo)
+		ctx.JSON(http.StatusOK, ipInfo)
+	}
 }
 
 func getIPInfo(client *http.Client) (*viewmodels.IPInfo, error) {

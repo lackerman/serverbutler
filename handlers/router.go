@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"embed"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -13,11 +15,10 @@ import (
 )
 
 // RegisterRoutes used by the web app to configure handlers to paths
-func RegisterRoutes(logger logr.Logger, db *leveldb.DB) http.Handler {
+func RegisterRoutes(logger logr.Logger, db *leveldb.DB, content *embed.FS) http.Handler {
 	logger = logger.WithName("router")
 
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/*")
 	// Custom recovery and logging middleware
 	r.Use(func(c *gin.Context) {
 		t := time.Now()
@@ -44,22 +45,30 @@ func RegisterRoutes(logger logr.Logger, db *leveldb.DB) http.Handler {
 		c.Next()
 	})
 
+	tmpl := template.Must(template.ParseFS(content, "templates/*.html"))
+
+	home := HomeHandler(tmpl.Lookup("home.html"))
+	cmd := CmdHandler(tmpl.Lookup("command.html"), logger)
+	cfg := NewConfigHandler(tmpl.Lookup("config.html"), db, logger)
+	vpn := NewOpenvpnHandler(db, logger)
+	slack := SlackHandler(db)
+	ip := IpHandler()
+
 	root := r.Group("/" + constants.SitePrefix())
-
 	p := root.Group("/")
-	p.GET("/", HomeHandler("home.html"))
-	p.GET("/ip", IpHandler)
-	p.POST("/cmd", CmdHandler)
-	p.GET("/config", NewConfigHandler("config.html", db, logger).get)
-	p.POST("/api/slack/config", SlackHandler(db))
+	p.GET("/", home)
+	p.GET("/ip", ip)
+	p.GET("/command", cmd.get)
+	p.GET("/config", cfg.get)
+	p.POST("/api/slack/config", slack)
+	p.POST("/api/command/execute", cmd.execute)
 
-	oh := NewOpenvpnHandler(db, logger)
 	o := root.Group("/api/openvpn")
-	o.POST("/config", oh.saveConfigDir)
-	o.POST("/selection", oh.saveSelection)
-	o.POST("/download", oh.downloadConfig)
-	o.POST("/restart", oh.restart)
-	o.GET("/credentials", oh.credentials)
+	o.POST("/config", vpn.saveConfigDir)
+	o.POST("/selection", vpn.saveSelection)
+	o.POST("/download", vpn.downloadConfig)
+	o.POST("/restart", vpn.restart)
+	o.GET("/credentials", vpn.credentials)
 
 	return r
 }

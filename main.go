@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
 	"net/http"
@@ -11,6 +12,9 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/klog/v2/klogr"
 )
+
+//go:embed templates
+var content embed.FS
 
 func main() {
 	port := flag.Int("port", 8080, "The port to use for the server (default: 8080)")
@@ -29,7 +33,7 @@ func main() {
 		logger.Error(err, "failed to open the connection to leveldb")
 	}
 
-	router := handlers.RegisterRoutes(logger, db)
+	router := handlers.RegisterRoutes(logger, db, &content)
 	if err := http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", *port), router); err != nil {
 		logger.Error(err, "failed to start up the server")
 	}

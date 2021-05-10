@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -20,13 +21,13 @@ import (
 type configController struct {
 	db       *leveldb.DB
 	logger   logr.Logger
-	template string
+	template *template.Template
 }
 
-func NewConfigHandler(t string, db *leveldb.DB, logger logr.Logger) *configController {
+func NewConfigHandler(t *template.Template, db *leveldb.DB, logger logr.Logger) *configController {
 	return &configController{
-		db:       db,
 		template: t,
+		db:       db,
 		logger:   logger,
 	}
 }
@@ -44,7 +45,7 @@ func (c *configController) get(ctx *gin.Context) {
 		return
 	}
 
-	ctx.HTML(http.StatusOK, c.template, viewmodels.Config{
+	c.template.Execute(ctx.Writer, viewmodels.Config{
 		Site:    viewmodels.Site{Page: "Config"},
 		OpenVPN: *openvpn,
 		Slack:   *slack,

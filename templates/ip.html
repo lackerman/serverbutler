@@ -7,7 +7,7 @@
     document
         .getElementById('refresh')
         .addEventListener('click', () =>
-            fetch({{ .Site.Prefix "ip"}})
+            fetch({{ .Prefix "ip" }})
                 .then(res => {
                     if (!res.ok) {
                         console.log(res);

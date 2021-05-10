@@ -1,15 +1,14 @@
 package handlers
 
 import (
-	"net/http"
+	"html/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lackerman/serverbutler/viewmodels"
 )
 
-func HomeHandler(template string) gin.HandlerFunc {
+func HomeHandler(t *template.Template) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		site := viewmodels.Site{Page: "Home"}
-		ctx.HTML(http.StatusOK, template, viewmodels.Home{Site: site})
+		t.Execute(ctx.Writer, viewmodels.Site{Page: "Home"})
 	}
 }
