@@ -18,8 +18,8 @@ docker:
 	docker build -t $(PROJECTNAME) .
 
 .PHONY: run
-run:
-	@air
+run: build
+	bin/serverbutler
 
 .PHONY: copy
 copy: check-server clean docker
