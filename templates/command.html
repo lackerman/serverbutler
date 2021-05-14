@@ -34,19 +34,15 @@
     function showOutput(content) {
         const frame = document.getElementById('output');
         frame.value = content;
-        document.getElementById('loader').style.display = "none";
         frame.style.display = "block";
     }
 
     document
         .getElementById('execute')
         .addEventListener('click', () => {
-            document.getElementById('loader').style.display = "block";
-
-            fetch('/cmd', { method: 'POST', body: document.getElementById('cmd').value })
+            fetch('/api/command/execute', { method: 'POST', body: document.getElementById('cmd').value })
                 .then(res => {
                     if (!res.ok) {
-                        console.log(res);
                         throw Error(`${res.statusText}: ${res.text()}`);
                     }
                     return res.text();

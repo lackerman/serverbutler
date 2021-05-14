@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -130,4 +132,14 @@ func (c *configController) slack() (*viewmodels.Slack, error) {
 		url = string(b)
 	}
 	return &viewmodels.Slack{URL: url}, nil
+}
+
+func getJsonPayload(body io.ReadCloser) (map[string]string, error) {
+	request := map[string]string{}
+	jsonData, err := ioutil.ReadAll(body)
+	if err != nil {
+		return request, err
+	}
+	err = json.Unmarshal(jsonData, &request)
+	return request, err
 }

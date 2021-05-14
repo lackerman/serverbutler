@@ -1,12 +1,12 @@
 <h4 class="title is-4">OpenVPN</h4>
 
-<h5 class="title is-5 mt-4">1. Select config directory</h5>
-<form method="post" action="/api/openvpn/config">
+<div class="mt-4">
+    <h5 class="title is-5 mt-4">1. Select config directory</h5>
     <div class="field has-addons">
         <div class="control">
-            <input class="input" name="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
+            <input class="input" id="dir" type="text" placeholder="Config directory" value="{{ .ConfigDir }}">
         </div>
-        <div class="control">
+        <div id="saveDir" class="control">
             <button type="submit" class="button is-info">
                 <span class="icon is-small">
                     <ion-icon name="folder-open-outline"></ion-icon>
@@ -15,68 +15,76 @@
             </button>
         </div>
     </div>
-</form>
+</div>
 
-<h5 class="title is-5 mt-4">2. Download config</h5>
-<button id="download" class="button is-info">
-    <span class="icon is-small">
-        <ion-icon name="cloud-download-outline"></ion-icon>
-    </span>
-    <span>Download configs</span>
-</button>
+<div class="mt-4">
+    <h5 class="title is-5 mt-4">2. Download config</h5>
+    <button id="download" class="button is-info">
+        <span class="icon is-small">
+            <ion-icon name="cloud-download-outline"></ion-icon>
+        </span>
+        <span>Download configs</span>
+    </button>
+</div>
 
-<h5 class="title is-5 mt-4">3. Select config to use</h5>
-<form method="post" action="/api/openvpn/selection">
-    <div class="dropdown is-active">
-        <div class="dropdown-trigger">
-            <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                <span>Select config</span>
-                <span class="icon is-small">
-                    <ion-icon name="chevron-down-outline"></ion-icon>
-                </span>
-            </button>
-        </div>
+<div class="mt-4">
+    <h5 class="title is-5">3. Select config to use</h5>
+    <select id="configs" class="dropdown">
+        {{$selected := .Selected}}
+        {{range .Configs}}
+        <option {{if eq . $selected }}selected{{end}} value="{{ . }}">{{ . }}</option>
+        {{end}}
+    </select>
+    <p></p>
+    <button id="saveSelection" class="button mt-2">
+        <span class="icon is-small">
+            <ion-icon name="save-outline"></ion-icon>
+        </span>
+        <span>Update</span>
+    </button>
+</div>
 
-        <div class="dropdown-menu" id="dropdown-menu" role="menu">
-            <div class="dropdown-content">
-                {{$selected := .Selected}}
-                {{range .Configs}}
-                <a class="dropdown-item {{if eq . $selected }}is-active{{end}}"> value="{{ . }}" >{{ . }}</a>
-                {{end}}
-            </div>
-        </div>
-    </div>
-</form>
-
-<h5 class="title is-5 mt-4">4. Set config credentials</h5>
-<form method="post" action="/api/openvpn/credentials">
-    <input class="input" name="username" type="text" placeholder="Username" value="{{ .Username }}">
-    <input class="input mt-2" name="password" type="password" placeholder="Password" value="{{ .Password }}">
-    <button class="button mt-2">
+<div class="mt-4">
+    <h5 class="title is-5">4. Set config credentials</h5>
+    <input class="input" id="username" type="text" placeholder="Username" value="{{ .Username }}">
+    <input class="input mt-2" id="password" type="password" placeholder="Password" value="{{ .Password }}">
+    <button id="credentials" class="button mt-2">
         <span class="icon is-small">
             <ion-icon name="save-outline"></ion-icon>
         </span>
         <span>Update credentials</span>
     </button>
-</form>
+</div>
 
-<h5 class="title is-5 mt-4">5. Restart VPN connection</h5>
-<form method="post" action="/api/openvpn/restart">
+<div class="mt-4">
+    <h5 class="title is-5">5. Restart VPN connection</h5>
     <div class="field">
-        <button class="button is-danger">
+        <button id="restart" class="button is-danger">
             <ion-icon name="power-outline"></ion-icon>
             <span> Restart</span>
         </button>
     </div>
-</form>
+</div>
 
 <script>
+    document.getElementById("saveDir").addEventListener('click', () => {
+        const selection = document.getElementById("dir");
+        post('/api/openvpn/config', JSON.stringify({ dir: selection.value }));
+    });
     document.getElementById("download").addEventListener('click', () => {
-        fetch('/api/openvpn/download', { method: 'POST' })
-            .then(res => {
-                if (!res.ok) {
-                    console.log(res)
-                }
-            });
+        post('/api/openvpn/download', {});
+    });
+    document.getElementById("saveSelection").addEventListener('click', () => {
+        const selection = document.getElementById("configs");
+        post('/api/openvpn/selection', JSON.stringify({ selected: selection.value }));
+    });
+    document.getElementById("credentials").addEventListener('click', () => {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        post("/api/openvpn/credentials", JSON.stringify({ username, password }));
+    });
+    document.getElementById("restart").addEventListener('click', () => {
+        const selection = document.getElementById("configs");
+        post('/api/openvpn/restart', JSON.stringify({ selected: selection.value }));
     });
 </script>

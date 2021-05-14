@@ -25,9 +25,15 @@ func NewOpenvpnHandler(db *leveldb.DB, logger logr.Logger) *openvpnHandler {
 }
 
 func (c *openvpnHandler) saveConfigDir(ctx *gin.Context) {
-	dir := ctx.PostForm("dir")
-	err := os.MkdirAll(dir, os.ModePerm)
+	payload, err := getJsonPayload(ctx.Request.Body)
 	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	dir := payload["dir"]
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		c.logger.Error(err, err.Error()+" -- "+dir)
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -37,17 +43,22 @@ func (c *openvpnHandler) saveConfigDir(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	ctx.Redirect(http.StatusFound, "/config")
+	ctx.JSON(http.StatusOK, gin.H{"message": "Saved the config directory"})
 }
 
 func (c *openvpnHandler) saveSelection(ctx *gin.Context) {
-	selected := ctx.PostForm("config")
-	err := c.db.Put([]byte(constants.OpenvpnSelected), []byte(selected), nil)
+	request, err := getJsonPayload(ctx.Request.Body)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	ctx.Redirect(http.StatusFound, "/config")
+	selected := request["selected"]
+	err = c.db.Put([]byte(constants.OpenvpnSelected), []byte(selected), nil)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Saved selection: %v", selected)})
 }
 
 func (c *openvpnHandler) downloadConfig(ctx *gin.Context) {
@@ -72,12 +83,16 @@ func (c *openvpnHandler) downloadConfig(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully downloaded the config"})
 }
 
 func (c *openvpnHandler) credentials(ctx *gin.Context) {
-	username := ctx.PostForm("username")
-	password := ctx.PostForm("password")
-	data := []byte(fmt.Sprintf("%v\n%v", username, password))
+	request, err := getJsonPayload(ctx.Request.Body)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	data := []byte(fmt.Sprintf("%v\n%v", request["username"], request["password"]))
 
 	dir, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
 	if err != nil {
@@ -89,36 +104,30 @@ func (c *openvpnHandler) credentials(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
-	ctx.Redirect(http.StatusTemporaryRedirect, "/config")
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated the credentials"})
 }
 
 func (c *openvpnHandler) restart(ctx *gin.Context) {
-	err := func(ctx *gin.Context) error {
-		configDir, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
-		if err != nil {
-			return err
-		}
-		selection, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
-		if err != nil {
-			return err
-		}
-		config := string(configDir) + "/" + string(selection)
-		c.logger.V(4).Info("Starting openvpn with the selected config", config)
-		cmd := exec.Command("openvpn", config)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Start(); err != nil {
-			return err
-		}
-		c.logger.V(4).Info("Started subprocess: ", cmd.Process.Pid)
-		return nil
-	}(ctx)
-
+	configDir, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	ctx.Redirect(http.StatusTemporaryRedirect, "/config")
+	selection, err := c.db.Get([]byte(constants.OpenvpnSelected), nil)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	config := string(configDir) + "/" + string(selection)
+	c.logger.V(4).Info("Starting openvpn with the selected config", config)
+	cmd := exec.Command("openvpn", config)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Start(); err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.logger.V(4).Info("Started subprocess: ", cmd.Process.Pid)
+	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully restarted openvpn"})
 }

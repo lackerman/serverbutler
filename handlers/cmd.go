@@ -35,6 +35,7 @@ func (c *cmdHandler) execute(ctx *gin.Context) {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	c.logger.V(4).Info(string(body))
 	args := strings.Split(string(body), " ")
 	cmd := exec.Command(args[0], args[1:]...)
 	bites, err := cmd.CombinedOutput()

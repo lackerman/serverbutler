@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"net/http"
 	"time"
@@ -29,15 +30,16 @@ func RegisterRoutes(logger logr.Logger, db *leveldb.DB, content *embed.FS) http.
 				"url", c.Request.URL.String(),
 				"status", c.Writer.Status(),
 				"latency_ms", latency.Milliseconds())
-
 			if err := recover(); err != nil {
 				stamp := time.Now().UnixNano()
-				c.String(500, "Interval Server Error. See error logs for timestamp %v", stamp)
+				internalError := fmt.Sprintf("Interval Server Error. See error logs for timestamp %v", stamp)
+				c.JSON(http.StatusInternalServerError, gin.H{"errors": []string{internalError}})
 				tmpLogger.V(0).Info("failed request", "error_timestamp", stamp)
 				return
 			}
 			if len(c.Errors) > 0 {
 				tmpLogger.V(0).Info("known failure", "errors", c.Errors.Errors())
+				c.JSON(c.Writer.Status(), gin.H{"errors": c.Errors.Errors()})
 				return
 			}
 			tmpLogger.V(5).Info("successful request")
@@ -55,20 +57,29 @@ func RegisterRoutes(logger logr.Logger, db *leveldb.DB, content *embed.FS) http.
 	ip := IpHandler()
 
 	root := r.Group("/" + constants.SitePrefix())
-	p := root.Group("/")
-	p.GET("/", home)
-	p.GET("/ip", ip)
-	p.GET("/command", cmd.get)
-	p.GET("/config", cfg.get)
-	p.POST("/api/slack/config", slack)
-	p.POST("/api/command/execute", cmd.execute)
+	root.Group("/").
+		GET("/", home).
+		GET("/ip", ip).
+		GET("/command", cmd.get).
+		GET("/config", cfg.get)
 
-	o := root.Group("/api/openvpn")
-	o.POST("/config", vpn.saveConfigDir)
-	o.POST("/selection", vpn.saveSelection)
-	o.POST("/download", vpn.downloadConfig)
-	o.POST("/restart", vpn.restart)
-	o.GET("/credentials", vpn.credentials)
+	api := root.Group("/api")
+	api.Group("/openvpn").
+		POST("/config", vpn.saveConfigDir).
+		POST("/selection", vpn.saveSelection).
+		POST("/download", vpn.downloadConfig).
+		POST("/restart", vpn.restart).
+		POST("/credentials", vpn.credentials)
+
+	api.Group("/transmission").
+		POST("/state", vpn.saveConfigDir).
+		POST("/url", vpn.saveSelection)
+
+	api.Group("/slack").
+		POST("/config", slack)
+
+	api.Group("/command").
+		POST("execute", cmd.execute)
 
 	return r
 }

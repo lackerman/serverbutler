@@ -5,14 +5,7 @@
 <body>
     {{template "nav.html" .}}
     <div class="container mt-4">
-        {{if .Notification}}
-            {{if eq .Notification.Type "info"}}
-                {{template "notification.html" .Notification }}
-            {{end}}
-            {{if eq .Notification.Type "error"}}
-                {{template "notification.html" .Notification }}
-            {{end}}
-        {{end}}
+        {{template "notification.html" }}
         <div class="columns">
             <div class="column">
                 {{template "openvpn.html" .OpenVPN}}

@@ -1,4 +1,28 @@
-<div class="{{ .Type }} notification">
-    <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
-    {{ .Message }}
+<div id="notification">
 </div>
+
+<script>
+    function showNotification(message, notificationType) {
+        if (document.getElementById("deleteNotification")) {
+            document.getElementById("notification").innerHTML = '';
+        }
+        const notification = document.createElement("div");
+        notification.className = `notification ${notificationType} mb-4`;
+        notification.innerHTML = `
+            <button id="deleteNotification" class="delete"></button>
+            ${message}
+        `;
+        document.getElementById("notification").appendChild(notification);
+        document.getElementById("deleteNotification").addEventListener('click', () => {
+            document.getElementById("notification").innerHTML = '';
+        });
+    }
+
+    function showError(message) {
+        showNotification(message, "is-warning");
+    }
+
+    function showSuccess(message) {
+        showNotification(message, "is-primary");
+    }
+</script>

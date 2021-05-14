@@ -10,13 +10,17 @@ import (
 
 func SlackHandler(db *leveldb.DB) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		url := ctx.PostForm("webhook")
-		err := db.Put([]byte(constants.SlackURLKey), []byte(url), nil)
+		payload, err := getJsonPayload(ctx.Request.Body)
 		if err != nil {
 			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-
-		ctx.Redirect(http.StatusTemporaryRedirect, "/config")
+		url := payload["url"]
+		err = db.Put([]byte(constants.SlackURLKey), []byte(url), nil)
+		if err != nil {
+			ctx.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"message": "Successfully updated the slack Url to " + url})
 	}
 }

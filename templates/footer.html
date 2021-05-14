@@ -1,2 +1,23 @@
 <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons/dist/ionicons/ionicons.js"></script>
+<script>
+    function post(url, body) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body,
+        })
+            .then(response => response.json())
+            .then(json => {
+                if (json.errors) {
+                    showError(json.errors.join());
+                } else {
+                    showSuccess(json.message);
+                }
+            })
+            .catch(error => showError(error.message));
+    }
+</script>

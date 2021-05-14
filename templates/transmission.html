@@ -1,6 +1,34 @@
-<h4 class="title is-4 mt-4">Transmission commands</h4>
+<div class="mt-4">
+    <h4 class="title">Transmission commands</h4>
 
-<form action="transmission/pause">
-    <button class="button">Pause all downloads</button>
-    <button class="button">Start all downloads</button>
-</form>
+    <div class="field has-addons">
+        <div class="control">
+            <input class="input" id="transmissionUrl" type="text" placeholder="Transmission URL" value="{{ .URL }}">
+        </div>
+        <div class="control">
+            <button id="saveTransmissionUrl" class="button is-info">
+                <span class="icon is-small">
+                    <ion-icon name="save-outline"></ion-icon>
+                </span>
+                <span>Update Transmission Url</span>
+            </button>
+        </div>
+    </div>
+    <button id="pauseDownloads" class="button">Pause all downloads</button>
+    <button id="startDownloads" class="button">Start all downloads</button>
+</div>
+
+<script>
+    document.getElementById("saveTransmissionUrl").addEventListener('click', () => {
+        const selection = document.getElementById("transmissionUrl");
+        post('/api/transmission/url', JSON.stringify({ url: selection.value }));
+    });
+    document.getElementById("startDownloads").addEventListener('click', () => {
+        const selection = document.getElementById("dir");
+        post('/api/transmission/state', JSON.stringify({ action: "start" }));
+    });
+    document.getElementById("pauseDownloads").addEventListener('click', () => {
+        const selection = document.getElementById("dir");
+        post('/api/transmission/state', JSON.stringify({ action: "pause" }));
+    });
+</script>
