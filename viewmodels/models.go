@@ -2,6 +2,7 @@ package viewmodels
 
 import (
 	"path"
+	"path/filepath"
 
 	"github.com/lackerman/serverbutler/constants"
 )
@@ -14,6 +15,11 @@ type Site struct {
 // Prefix returns the uri prefix of the site
 func (Site) Prefix(uri string) string {
 	return path.Join(constants.SitePrefix(), uri)
+}
+
+// Prefix returns the uri prefix of the site
+func (Site) Filename(path string) string {
+	return filepath.Base(path)
 }
 
 // Home represents the variables for the home page

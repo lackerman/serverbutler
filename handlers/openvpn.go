@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-logr/logr"
@@ -53,7 +54,17 @@ func (c *openvpnHandler) saveSelection(ctx *gin.Context) {
 		return
 	}
 	selected := request["selected"]
+	err = makeSymlink(selected)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	err = c.db.Put([]byte(constants.OpenvpnSelected), []byte(selected), nil)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	err = c.restartOpenvpn(selected)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -62,23 +73,23 @@ func (c *openvpnHandler) saveSelection(ctx *gin.Context) {
 }
 
 func (c *openvpnHandler) downloadConfig(ctx *gin.Context) {
-	b, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
+	dirBytes, err := c.db.Get([]byte(constants.OpenvpnDir), nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	dir := string(b)
-	err = utils.DownloadFile(dir, "https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip")
+	vpnDir := string(dirBytes)
+	filename, err := utils.DownloadFile(vpnDir, "https://downloads.nordcdn.com/configs/archives/servers/ovpn.zip")
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	err = utils.UnzipFile(dir, filepath.Join(dir, "zip"))
+	err = utils.Unzip(filepath.Join(vpnDir, filename), vpnDir)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	err = os.Remove(filepath.Join(dir, "zip"))
+	err = os.Remove(filepath.Join(vpnDir, filename))
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -119,15 +130,55 @@ func (c *openvpnHandler) restart(ctx *gin.Context) {
 		return
 	}
 	config := string(configDir) + "/" + string(selection)
-	c.logger.V(4).Info("Starting openvpn with the selected config", config)
-	cmd := exec.Command("openvpn", config)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Start(); err != nil {
+	err = c.restartOpenvpn(config)
+	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.logger.V(4).Info("Started subprocess: ", cmd.Process.Pid)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Successfully restarted openvpn"})
+}
+func (c *openvpnHandler) restartOpenvpn(config string) error {
+	c.logger.V(4).Info("restarting openvpn with the selected config", config)
+	cmd := exec.Command("service", "openvpn", "restart")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	c.logger.V(4).Info("Started subprocess: ", cmd.Process.Pid)
+	return nil
+}
+
+func makeSymlink(selectedConfig string) error {
+	openvpnConf, err := openvpnCfg()
+	if err != nil {
+		return err
+	}
+	if _, err := os.Lstat(openvpnConf); err == nil {
+		err = os.Remove(openvpnConf)
+		if err != nil {
+			return err
+		}
+	}
+	return os.Symlink(selectedConfig, openvpnConf)
+}
+
+func openvpnCfg() (string, error) {
+	path := "/usr/local/etc/openvpn/openvpn.conf"
+	if runtime.GOOS != "freebsd" {
+		dir, err := currPath()
+		if err != nil {
+			return "", err
+		}
+		path = dir + "/openvpn.conf"
+	}
+	return path, nil
+}
+
+func currPath() (string, error) {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		return "", nil
+	}
+	return dir, nil
 }

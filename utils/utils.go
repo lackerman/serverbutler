@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,25 +16,21 @@ import (
 
 // GetFileList returns all the files in the specified directory
 func GetFileList(directory string) ([]string, error) {
-	file, err := os.Open(directory)
-	defer file.Close()
+	paths := []string{}
+	err := filepath.Walk(directory,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if !info.IsDir() {
+				paths = append(paths, path)
+			}
+			return nil
+		})
 	if err != nil {
 		return nil, err
 	}
-
-	fileInfos, err := file.Readdir(-1)
-	if err != nil {
-		return nil, err
-	}
-
-	paths := new([]string)
-	for _, fileInfo := range fileInfos {
-		if !fileInfo.IsDir() && strings.IndexRune(fileInfo.Name(), '.') != 0 {
-			*paths = append(*paths, fileInfo.Name())
-		}
-	}
-
-	return *paths, nil
+	return paths, nil
 }
 
 // Hash to get a sha1 hash of a string
@@ -80,59 +77,91 @@ func FileExists(filename string) bool {
 	return !os.IsNotExist(err)
 }
 
-func DownloadFile(dir string, url string) error {
+func DownloadFile(dir string, url string) (string, error) {
 	response, err := http.Get(url)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer response.Body.Close()
 
 	filename := filepath.Base(url)
 	file, err := os.Create(filepath.Join(dir, filename))
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
 	numCopied, err := io.Copy(file, response.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if numCopied == 0 {
-		return errors.New("No data was downloaded from the URL")
+		return "", errors.New("no data was downloaded from the URL")
 	}
-	return nil
+	return filename, nil
 }
 
 // UnzipFile takes a destination folder unzips the supplied file to the destination folder
-func UnzipFile(dst string, filename string) error {
-	if !FileExists(dst) {
-		if err := os.Mkdir(dst, os.ModePerm); err != nil {
-			return err
-		}
-	}
-	// Open a zip archive for reading.
-	r, err := zip.OpenReader(filename)
+func Unzip(src, dest string) error {
+	r, err := zip.OpenReader(src)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func() {
+		if err := r.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
-	for _, f := range r.File {
+	os.MkdirAll(dest, 0755)
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	extractAndWriteFile := func(f *zip.File) error {
 		rc, err := f.Open()
 		if err != nil {
 			return err
 		}
-		nf, err := os.Create(filepath.Join(dst, f.Name))
-		if err != nil {
-			return err
+		defer func() {
+			if err := rc.Close(); err != nil {
+				panic(err)
+			}
+		}()
+
+		path := filepath.Join(dest, f.Name)
+
+		// Check for ZipSlip (Directory traversal)
+		if !strings.HasPrefix(path, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return fmt.Errorf("illegal file path: %s", path)
 		}
-		_, err = io.Copy(nf, rc)
-		if err != nil {
-			return err
+
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(path, f.Mode())
+		} else {
+			os.MkdirAll(filepath.Dir(path), 0777)
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := f.Close(); err != nil {
+					panic(err)
+				}
+			}()
+
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
 		}
-		rc.Close()
-		nf.Close()
+		return nil
 	}
+
+	for _, f := range r.File {
+		err := extractAndWriteFile(f)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
