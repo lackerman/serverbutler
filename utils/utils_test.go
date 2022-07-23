@@ -87,7 +87,7 @@ func TestFileDownload(t *testing.T) {
 
 func TestUnzipFile(t *testing.T) {
 	DownloadFile("./", "https://nordvpn.com/api/files/zip")
-	err := UnzipFile("./unzipped", "zip")
+	err := Unzip("zip", "./unzipped")
 	if err != nil {
 		t.Fatalf("Failed to unzip file. %v", err.Error())
 	}

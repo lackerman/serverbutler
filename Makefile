@@ -13,6 +13,10 @@ build: main.go
 build-arm: main.go
 	@$(MAKE) build GOOS=linux GOARCH=arm GOARM=7
 
+build-freebsd: main.go
+	@$(MAKE) build GOOS=freebsd GOARCH=amd64
+	scp bin/serverbutler rwuser@truenas.ackerboom.io:.
+
 .PHONY: docker
 docker:
 	docker build -t $(PROJECTNAME) .
